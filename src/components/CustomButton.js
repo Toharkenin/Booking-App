@@ -4,7 +4,11 @@ import {TouchableOpacity, Text, StyleSheet} from 'react-native';
 
 export default function CustomButton(props) {
   return (
-    <TouchableOpacity style={styles.container} >
+    <TouchableOpacity 
+        {...props}
+        style={styles.container} 
+        activeOpacity={0.7}
+        disabled={props.disabled}>
       <Text style={styles.text}>{props.text}</Text>
     </TouchableOpacity>
   );
@@ -21,17 +25,16 @@ export default function CustomButton(props) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 46,
-    backgroundColor: '#b89c47',
-    borderRadius: 30,
+    backgroundColor: 'black',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 100,
-
+    paddingVertical: 10,
+    marginTop: 100,
+    width: '80%',
+    marginBottom: 0,
   },
   text: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
   },
 })
