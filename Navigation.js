@@ -35,7 +35,7 @@ export default function Navigation() {
                         drawerIcon: () => <Icon name="home" size={24}/>
                     }} />
                 <Drawer.Screen name='פתיחת משתמש' component={Signup} />
-                <Drawer.Screen name='Signin' component={Signin} />
+                <Drawer.Screen name='הזדהות' component={Signin} />
             </Drawer.Navigator>
         </NavigationContainer>
     );

@@ -1,40 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {View, Text, Image, StyleSheet, Pressable} from 'react-native';
 import logo from '../assets/logo-dark.png';
 import DatePicker from 'react-native-date-picker'
 import Input from '../components/Input';
 import CustomButton from '../components/CustomButton';
-import Signin from './Signin';
-import { useState } from 'react';
 import moment from 'moment';
+import { registerCustomIconType } from 'react-native-elements';
 
 export default function Signup({navigation}) {
 
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
+    // const selected = (e) => {
+    //     const value = e.target.value;
+    //     setInputs.birthDay(value);
+    // }
+    const [inputs, setInputs] = useState({
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        birthDay: '',
+    });
 
-    function SubmitButton () {
-        if(firstName==="" || lastName==="" || phoneNumber===""){
-            return <CustomButton text="המשך" disabled />    
+    const onChange = (text, input) => {
+        setInputs((firstState) => ({...firstState, [input]:text}));
+    };
+    function SubmitButton({onPress}) { 
+        if (!inputs.firstName ||
+            !inputs.lastName || 
+            inputs.phoneNumber.toString().length < 10 ||
+            inputs.phoneNumber.toString()[0] !== "0" ||
+            inputs.phoneNumber.toString()[1] !== "5") {
+            return <CustomButton text="המשך" disabled/>
         } else {
-            return <CustomButton text="המשך" />}
+            return <CustomButton text="המשך" onPress={onPress} />
+        }
     }
-
+    console.log(inputs)
     return (
         <View style={styles.container}>
             <Image source= {logo} style={styles.logo} resizeMode="center" />
-            <Input value={firstName} name="שם פרטי" iconName="user-alt" onChange={ e => setFirstName(e.target.value)}/>
-            <Input value={lastName} name="שם משפחה" iconName="user-alt" onChange={ e => setLastName(e.target.value)}/>
             <Input 
-                value={phoneNumber}
+                name="שם פרטי" 
+                iconName="user-alt" 
+                onChangeText={text => onChange(text, 'firstName')}/>                                     
+            <Input 
+                name="שם משפחה" 
+                iconName="user-alt"
+                onChangeText={text => onChange(text, 'lastName')}/>
+            <Input 
                 name="טלפון-נייד" 
+                maxLength={10}
+                minLength={10}
                 iconName="phone-alt"
                 keyboardType="numeric" 
-                onChange={ e => setPhoneNumber(e.target.value)}/>
-            <InputBirthDay />
-            <SubmitButton/>
-            <Pressable onPress={() => navigation.navigate("Signin")}>
+                onChangeText={text => onChange(text, 'phoneNumber')}/>
+            <InputBirthDay value={inputs.birthDay} />
+            <SubmitButton onPress={() => navigation.navigate("ראשי")} />
+            <Pressable onPress={() => navigation.navigate('הזדהות')}>
                 <Text style={styles.text}>
                     יש לך משתמש? לחץ להתחברות
                 </Text>
@@ -43,39 +64,36 @@ export default function Signup({navigation}) {
     );
   };
 
-const InputBirthDay = () => {
+const InputBirthDay = (props, {selected}) => {
 
     const [date, setDate] = useState(new Date());
     const [open, setOpen] = useState(false);
     const [text, setText] = useState("");
 
-    const confirm = () => {
-
+    const confirm = (selectedDate) => {
+        setDate(selectedDate);
+        let newDate = moment(selectedDate).format("DD/MM/YYYY");
+        setText(newDate);
+        setOpen(false);
+        selected= text
     };
-
-
-    let time = moment().format("DD/MM/YYYY");
     return (
         <View>
-        <Pressable 
-             style={styles.con}>
                 <Input name="תאריך לידה"
+                    style={{width: '100%',alignItems: 'center',
+                    flexDirection: 'row',}}
+                    {...props}
                     value={text}
                     iconName="calendar-day" 
                     showSoftInputOnFocus={false}
-                    // onChange={e => e.target.value}
                     onPressIn={() => setOpen(true)}
                     />
-                </Pressable>
             <DatePicker 
                 modal
                 open={open}
                 date={date}
                 mode="date"
-                // dateFormat='DD/MM/YYYY'
-                onConfirm={() => {setOpen(false)
-                    setDate(date)
-                    setText(time)}}
+                onConfirm={confirm}
                 onCancel={() => {
                     setOpen(false)
                 }}/>
@@ -86,12 +104,12 @@ const InputBirthDay = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
         alignItems: 'center',
     },
     con: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        // flexDirection: 'row',
+        // alignItems: 'center',
     },
     logo: {
         height: 140,
@@ -103,7 +121,4 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '700'
     },
-    input: {
-
-    }
 });

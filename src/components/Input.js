@@ -1,21 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {View, Text, TextInput, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 
 
-export default function Input(props) {
+export default function Input(props, {error}) {
+
+    // const [isFocused, setIsFocused] = useState(false);
 
     return(
         <View style={styles.container}>
             <TextInput 
                 {...props}
+                // onFocus={() => {
+                //     props.onFocus = () =>{}
+                //     setIsFocused(true);
+                // }}
+                // onBlur={() => {
+                //     setIsFocused(false);
+                // }}
                 placeholder={props.name} 
                 style={styles.input}
                 keyboardType={props.keyboardType}
                 textAlign='right'
                 />
-            <Icon name={props.iconName} size={24}/>
+            <Icon name={props.iconName} size={24} />
         </View>
     )
 }
@@ -23,14 +32,14 @@ export default function Input(props) {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        paddingBottom: 10,
         alignItems: 'center',
-        marginHorizontal: 35,
-        marginTop: 15,
+        width: '80%',
+        marginTop: 25,
     },
     input: {
         flex: 1,
-        borderBottomWidth: 1.5,
+        borderBottomWidth: 1,
         fontSize: 18,
+        borderBottomColor: 'gray',
     }
 });

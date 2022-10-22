@@ -6,9 +6,9 @@ export default function CustomButton(props) {
   return (
     <TouchableOpacity 
         {...props}
-        style={styles.container} 
+        style={[styles.container, {backgroundColor: props.disabled ? 'gray': 'black'}]} 
         activeOpacity={0.7}
-        disabled={props.disabled}>
+        onPress={props.onPress}>
       <Text style={styles.text}>{props.text}</Text>
     </TouchableOpacity>
   );
@@ -31,10 +31,11 @@ const styles = StyleSheet.create({
     marginTop: 100,
     width: '80%',
     marginBottom: 0,
+    borderRadius: 10,
   },
   text: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 18,   
   },
 })
