@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {View, Text, Image, StyleSheet, Pressable} from 'react-native';
+import {View, Text, Image, StyleSheet, Pressable, Keyboard, ScrollView} from 'react-native';
 import logo from '../assets/logo-dark.png';
 import DatePicker from 'react-native-date-picker'
 import Input from '../components/Input';
@@ -31,12 +31,13 @@ export default function Signup({navigation}) {
             inputs.phoneNumber.toString()[1] !== "5") {
             return <CustomButton text="המשך" disabled/>
         } else {
+            Keyboard.dismiss();
             return <CustomButton text="המשך" onPress={onPress} />
         }
     }
     console.log(inputs)
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Image source= {logo} style={styles.logo} resizeMode="center" />
             <Input 
                 name="שם פרטי" 
@@ -60,7 +61,7 @@ export default function Signup({navigation}) {
                     יש לך משתמש? לחץ להתחברות
                 </Text>
             </Pressable>
-        </View>
+        </ScrollView>
     );
   };
 
@@ -105,7 +106,7 @@ const InputBirthDay = (props, {selected}) => {
 const styles = StyleSheet.create({
     container: {
         // flex: 1,
-        alignItems: 'center',
+        // alignSelf: 'center',
     },
     con: {
         // flexDirection: 'row',
@@ -115,10 +116,12 @@ const styles = StyleSheet.create({
         height: 140,
         width: 140,
         marginTop: 30,
+        alignSelf: 'center',
     },
     text: {
         marginTop: 20,
         fontSize: 18,
-        fontWeight: '700'
+        fontWeight: '700',
+        alignSelf: 'center',
     },
 });

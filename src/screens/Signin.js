@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
+import {View, Text, StyleSheet, Image, Pressable, Keyboard, ScrollView} from 'react-native';
 import Input from '../components/Input';
 import CustomButton from '../components/CustomButton';
 import logo from '../assets/logo-dark.png';
@@ -13,14 +13,15 @@ export default function Signin( {navigation} ) {
         if (phoneNumber.toString().length < 10 ||
             phoneNumber.toString()[0] !== "0" ||
             phoneNumber.toString()[1] !== "5") {
-            return <CustomButton text="התחברות" disabled/>
+            return <CustomButton text="שלחו לי סיסמא ב-SMS" disabled/>
         } else {
-            return <CustomButton text="התחברות" onPress={onPress} />
+            Keyboard.dismiss();
+            return <CustomButton text="שלחו לי סיסמא ב-SMS" onPress={onPress} />
         }
     }
 
     return(
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
         <Image source= {logo} style={styles.logo} resizeMode="center" />
         <Text style={styles.text}>הזן מספר טלפון נייד להזדהות</Text>
         <Input 
@@ -32,13 +33,20 @@ export default function Signin( {navigation} ) {
                 keyboardType="numeric"
                 onChangeText={setPhoneNumber}
                 />
+                {/* <ErrorMessage /> */}
                 <SubmitButton />
                 <Pressable onPress={() => navigation.navigate('פתיחת משתמש')}>
                     <Text style={styles.newUserText}>לקוח חדש? לחץ לפתיחת משתמש</Text>
                 </Pressable>
-    </View>
+    </ScrollView>
     )
   };
+
+const ErrorMessage = () => {
+    return (
+        <Text style={styles.errorMessage}>לא מצאנו את המספר שהזנת... </Text>
+    )
+}
 
 const InputCode = () => {
 
@@ -55,7 +63,7 @@ const InputCode = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
+        // alignItems: 'center',
     },
     text: {
         fontSize: 20,
@@ -69,10 +77,18 @@ const styles = StyleSheet.create({
         height: 140,
         width: 140,
         marginTop: 30,
+        alignSelf: "center",
     },
     newUserText: {
         fontSize: 18,
         fontWeight: '700',
         marginTop: 20,
+        alignSelf: "center",
     },
+    errorMessage: {
+        fontSize: 16,
+        color: 'red',
+        marginRight: 40,
+        marginTop: 10,
+    }
 });

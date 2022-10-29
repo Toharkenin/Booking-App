@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import Home from './src/screens/Home';
 import Signup from './src/screens/Signup';
 import Signin from './src/screens/Signin';
+import Schedule from './src/screens/Schedule';
 
 export default function Navigation() {
 
@@ -36,6 +37,7 @@ export default function Navigation() {
                     }} />
                 <Drawer.Screen name='פתיחת משתמש' component={Signup} />
                 <Drawer.Screen name='הזדהות' component={Signin} />
+                <Drawer.Screen name='קביעת תור חדש' component={Schedule} />
             </Drawer.Navigator>
         </NavigationContainer>
     );
