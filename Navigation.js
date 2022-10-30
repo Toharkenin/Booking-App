@@ -13,11 +13,14 @@ export default function Navigation() {
     const Drawer = createDrawerNavigator();
     const screenOptions = {
         drawerPosition: "right",
-        headerTintColor: '#FFFFFF',
+        headerTintColor: '#F2F2F2',
+        headerStyle: {
+             backgroundColor: "#F2F2F2"       
+        },
         // drawerType: "back",
         // headerStyle: { backgroundColor: 'black'},
         headerLeft: false,
-        headerRight: () => <DrawerToggleButton color="#fff"
+        headerRight: () => <DrawerToggleButton 
         />,
     }
     
@@ -27,7 +30,8 @@ export default function Navigation() {
             <Drawer.Navigator
                 screenOptions={screenOptions}
                 initialRouteName="פתיחת משתמש"
-                rightButtonIconStyle={{tintColor: '#fff'}}
+                
+                // rightButtonIconStyle={{tintColor: 'black'}}
                  >
                 <Drawer.Screen 
                     name='ראשי' 

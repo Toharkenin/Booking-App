@@ -6,17 +6,10 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 
 export default function Input(props) {
 
-    const [isFocused, setIsFocused] = useState(false);
-
     return(
         <View style={styles.container}>
             <TextInput 
                 {...props}
-                // onFocus={() => {
-                    // props.onFocus
-                    // setIsFocused(true);
-                // }}
-                // onBlur={() => setIsFocused(false)}
                 placeholder={props.name} 
                 style={styles.input}
                 keyboardType={props.keyboardType}

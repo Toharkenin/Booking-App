@@ -9,26 +9,28 @@ import { registerCustomIconType } from 'react-native-elements';
 
 export default function Signup({navigation}) {
 
-    // const selected = (e) => {
-    //     const value = e.target.value;
-    //     setInputs.birthDay(value);
-    // }
     const [inputs, setInputs] = useState({
         firstName: '',
         lastName: '',
         phoneNumber: '',
         birthDay: '',
     });
+    
+    // const selected = (e) => {
+    //     const value = e.target.value;
+    //     setInputs.birthDay(value);
+    // }
 
     const onChange = (text, input) => {
-        setInputs((firstState) => ({...firstState, [input]:text}));
+        setInputs((prevState) => ({...prevState, [input]:text}));
     };
     function SubmitButton({onPress}) { 
         if (!inputs.firstName ||
             !inputs.lastName || 
             inputs.phoneNumber.toString().length < 10 ||
             inputs.phoneNumber.toString()[0] !== "0" ||
-            inputs.phoneNumber.toString()[1] !== "5") {
+            inputs.phoneNumber.toString()[1] !== "5"
+            ) {
             return <CustomButton text="המשך" disabled/>
         } else {
             Keyboard.dismiss();
@@ -37,7 +39,7 @@ export default function Signup({navigation}) {
     }
     console.log(inputs)
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView>
             <Image source= {logo} style={styles.logo} resizeMode="center" />
             <Input 
                 name="שם פרטי" 
@@ -54,7 +56,7 @@ export default function Signup({navigation}) {
                 iconName="phone-alt"
                 keyboardType="numeric" 
                 onChangeText={text => onChange(text, 'phoneNumber')}/>
-            <InputBirthDay value={inputs.birthDay} />
+            <InputBirthDay value={inputs.birthDay}/>
             <SubmitButton onPress={() => navigation.navigate("ראשי")} />
             <Pressable onPress={() => navigation.navigate('הזדהות')}>
                 <Text style={styles.text}>
@@ -104,14 +106,6 @@ const InputBirthDay = (props, {selected}) => {
 
 
 const styles = StyleSheet.create({
-    container: {
-        // flex: 1,
-        // alignSelf: 'center',
-    },
-    con: {
-        // flexDirection: 'row',
-        // alignItems: 'center',
-    },
     logo: {
         height: 140,
         width: 140,
