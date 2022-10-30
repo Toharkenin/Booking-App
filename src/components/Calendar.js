@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text} from 'react-native';
-import {Calendar, LocaleConfig } from 'react-native-calendars';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/Feather'
 
@@ -20,7 +20,12 @@ export default class SetCalendar extends React.Component {
       });
   };
   
+ 
  render() {
+  const selectedDate =props => <Text>{props.state.selectedDate}</Text>
+  console.log(selectedDate);
+  
+
   return (
       <View style={styles.container}>
             <TouchableOpacity onPress={this.props.onXPressed} style={styles.icon}>
