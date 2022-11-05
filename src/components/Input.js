@@ -13,7 +13,9 @@ export default function Input(props) {
                 placeholder={props.name} 
                 style={styles.input}
                 keyboardType={props.keyboardType}
+                autoCapitalize='none'
                 textAlign='right'
+                autoFocus={props.autoFocus}
                 />
             <Icon name={props.iconName} size={24} />
         </View>

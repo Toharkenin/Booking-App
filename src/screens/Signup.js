@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import {View, Text, Image, StyleSheet, Pressable, Keyboard, ScrollView} from 'react-native';
+import { Text, Image, StyleSheet, Pressable, Keyboard, ScrollView} from 'react-native';
 import logo from '../assets/logo-dark.png';
-import DatePicker from 'react-native-date-picker'
 import Input from '../components/Input';
 import CustomButton from '../components/CustomButton';
-import moment from 'moment';
-import { registerCustomIconType } from 'react-native-elements';
+import { useDispatch } from 'react-redux';
+import {login} from '../../redux/reducers/userSlice';
+import BirthDayInput from '../components/BirtheDayInput';
 
 export default function Signup({navigation}) {
 
@@ -13,20 +13,22 @@ export default function Signup({navigation}) {
         firstName: '',
         lastName: '',
         phoneNumber: '',
-        birthDay: '',
     });
-    
-    // const selected = (e) => {
-    //     const value = e.target.value;
-    //     setInputs.birthDay(value);
-    // }
+    const [birthDay, setBirthDay]= useState("");
+    const dispatch = useDispatch();
 
     const onChange = (text, input) => {
         setInputs((prevState) => ({...prevState, [input]:text}));
     };
+
+    const getDate = (date) => {
+        setBirthDay(date)
+    }
+    
     function SubmitButton({onPress}) { 
         if (!inputs.firstName ||
             !inputs.lastName || 
+            !birthDay ||
             inputs.phoneNumber.toString().length < 10 ||
             inputs.phoneNumber.toString()[0] !== "0" ||
             inputs.phoneNumber.toString()[1] !== "5"
@@ -37,14 +39,29 @@ export default function Signup({navigation}) {
             return <CustomButton text="המשך" onPress={onPress} />
         }
     }
-    console.log(inputs)
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        dispatch(login({
+            firstName: inputs.firstName,
+            lastName: inputs.lastName,
+            phoneNumber: inputs.phoneNumber,
+            birthDay: birthDay,
+            loggedIn: true,
+        }));
+
+        navigation.navigate('קביעת תור חדש');
+    }
+
     return (
         <ScrollView>
             <Image source= {logo} style={styles.logo} resizeMode="center" />
             <Input 
                 name="שם פרטי" 
                 iconName="user-alt" 
-                onChangeText={text => onChange(text, 'firstName')}/>                                     
+                onChangeText={text => onChange(text, 'firstName')}
+                autoFocus={true}/>                                     
             <Input 
                 name="שם משפחה" 
                 iconName="user-alt"
@@ -56,8 +73,8 @@ export default function Signup({navigation}) {
                 iconName="phone-alt"
                 keyboardType="numeric" 
                 onChangeText={text => onChange(text, 'phoneNumber')}/>
-            <InputBirthDay value={inputs.birthDay}/>
-            <SubmitButton onPress={() => navigation.navigate("ראשי")} />
+            <BirthDayInput getDate={(e)=>getDate(e)}/>
+            <SubmitButton onPress={(e) => handleSubmit(e)} />
             <Pressable onPress={() => navigation.navigate('הזדהות')}>
                 <Text style={styles.text}>
                     יש לך משתמש? לחץ להתחברות
@@ -67,45 +84,8 @@ export default function Signup({navigation}) {
     );
   };
 
-const InputBirthDay = (props, {selected}) => {
 
-    const [date, setDate] = useState(new Date());
-    const [open, setOpen] = useState(false);
-    const [text, setText] = useState("");
-
-    const confirm = (selectedDate) => {
-        setDate(selectedDate);
-        let newDate = moment(selectedDate).format("DD/MM/YYYY");
-        setText(newDate);
-        setOpen(false);
-        selected= text
-    };
-    return (
-        <View>
-                <Input name="תאריך לידה"
-                    style={{width: '100%',alignItems: 'center',
-                    flexDirection: 'row',}}
-                    {...props}
-                    value={text}
-                    iconName="calendar-day" 
-                    showSoftInputOnFocus={false}
-                    onPressIn={() => setOpen(true)}
-                    />
-            <DatePicker 
-                modal
-                open={open}
-                date={date}
-                mode="date"
-                onConfirm={confirm}
-                onCancel={() => {
-                    setOpen(false)
-                }}/>
-        </View>
-    )
-}
-
-
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
     logo: {
         height: 140,
         width: 140,

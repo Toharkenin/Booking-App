@@ -106,7 +106,7 @@ export default function Schedule() {
         alignSelf: 'center',
         backgroundColor: '#fff',
         paddingVertical: 20,
-        marginVertical: 7,
+        marginVertical: 15,
         width: '90%', 
         shadowColor: "#000",
         shadowOffset: {
@@ -116,6 +116,7 @@ export default function Schedule() {
         elevation: 10, 
         flexDirection: 'row',
         justifyContent: 'space-between',
+        borderRadius: 5,
     },
     text: {
         fontSize: 18,

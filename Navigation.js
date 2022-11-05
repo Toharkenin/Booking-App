@@ -7,6 +7,10 @@ import Home from './src/screens/Home';
 import Signup from './src/screens/Signup';
 import Signin from './src/screens/Signin';
 import Schedule from './src/screens/Schedule';
+import { Provider } from "react-redux";
+import configureStore from "./redux/store";
+
+const store = configureStore();
 
 export default function Navigation() {
 
@@ -17,8 +21,6 @@ export default function Navigation() {
         headerStyle: {
              backgroundColor: "#F2F2F2"       
         },
-        // drawerType: "back",
-        // headerStyle: { backgroundColor: 'black'},
         headerLeft: false,
         headerRight: () => <DrawerToggleButton 
         />,
@@ -26,6 +28,7 @@ export default function Navigation() {
     
 
     return (
+        <Provider store={store}>
         <NavigationContainer>
             <Drawer.Navigator
                 screenOptions={screenOptions}
@@ -44,6 +47,7 @@ export default function Navigation() {
                 <Drawer.Screen name='קביעת תור חדש' component={Schedule} />
             </Drawer.Navigator>
         </NavigationContainer>
+        </Provider>
     );
   };
 
