@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {View, Text, TextInput, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
-
-
 export default function Input(props) {
 
     return(
