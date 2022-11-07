@@ -33,7 +33,7 @@ export default function Signup({navigation}) {
             inputs.phoneNumber.toString()[0] !== "0" ||
             inputs.phoneNumber.toString()[1] !== "5"
             ) {
-            return <CustomButton text="המשך" disabled/>
+            return <CustomButton text="המשך" disabled />
         } else {
             Keyboard.dismiss();
             return <CustomButton text="המשך" onPress={onPress} />

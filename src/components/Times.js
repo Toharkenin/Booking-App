@@ -24,8 +24,12 @@ const items = [
     { time: "14:30", key: "20"},
 ];
 
-export default function timesList(props) {
+export default function timesList({getTime, ...props}) {
 
+    const onTimePressed = (time) => {
+      const t = time;
+        getTime(t);
+    }
     return (  
         <View style={styles.container}>
             <TouchableOpacity onPress={props.onXPressed} style={styles.icon}>
@@ -37,7 +41,7 @@ export default function timesList(props) {
                 <TouchableOpacity 
                     key={index} 
                     style={styles.btn}
-                    onPress={() => props.onPress}>
+                    onPress={() => onTimePressed(item.time)}>
                     <Text style={styles.btnText}>{item.time}</Text>
                 </TouchableOpacity>
             ))}

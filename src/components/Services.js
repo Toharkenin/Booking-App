@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
 
-export default function Services(props) {
+
+const items = [
+  { name: "תספורת"},
+  { name: "תספורת + זקן"},
+  { name: "תספורת + שעווה"},
+
+];
+export default function Services({getService, ...props}) {
+
+  const onServicePressed = (service) => {
+    const t = service;
+      getService(t);
+  }
 
     return(
         <View style={styles.container}>
@@ -10,19 +22,17 @@ export default function Services(props) {
                 <Icon name="x" size={32} />
             </TouchableOpacity>
           <Text style={styles.header}>איזה טיפול תרצה לבחור?</Text>
-          <TouchableOpacity style={styles.btn}>
-              <Text style={styles.btnText}>תספורת</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-              <Text style={styles.btnText}>תספורת + זקן</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-              <Text style={styles.btnText}>תספורת + שעווה</Text>
-          </TouchableOpacity>
+          {items.map((item, index) => (
+                <TouchableOpacity 
+                    key={index} 
+                    style={styles.btn}
+                    onPress={() => onServicePressed(item.name)}>
+                    <Text style={styles.btnText}>{item.name}</Text>
+                </TouchableOpacity>
+            ))}
         </View>
     )
   };
-
 
 
 const styles = StyleSheet.create({

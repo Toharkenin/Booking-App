@@ -1,42 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text} from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/Feather'
 
-export default class SetCalendar extends React.Component {
-  state = {
-      markedDates: {},
-      selectedDate: '',
-  }
+export default function SetCalendar({getDate, ...props}) {
+
+const [markedDates, setMarkedDates] = useState({});
+const [selectedDate, setSelectedDates] = useState('');
     
-  onDayPress = (date) => {
-      let markedDates = {};
-      markedDates[date] = {selected: true, color: '#b89c47', textColor: '#FFFFFF'};
-      let serviceDate = moment(date).format("DD/MM/YYYY");
-      this.setState({
-          selectedDate: serviceDate,
-          markedDates: markedDates,
-      });
+ const onDayPress = (date) => {
+    setMarkedDates[date] = {selected: true, color: '#b89c47', textColor: '#FFFFFF'};
+    let newDate = moment(date).format("DD/MM/YYYY");
+    setSelectedDates(newDate);
+    setMarkedDates(markedDates);
+    getDate(newDate);
   };
-  
- 
- render() {
-  const selectedDate =props => <Text>{props.state.selectedDate}</Text>
-  console.log(selectedDate);
-  
 
   return (
       <View style={styles.container}>
-            <TouchableOpacity onPress={this.props.onXPressed} style={styles.icon}>
+            <TouchableOpacity onPress={props.onXPressed} style={styles.icon}>
                 <Icon name="x" size={32} />
             </TouchableOpacity>
             <Calendar
             minDate={Date()}
             maxDate={"2030-05-30"}
-            markedDates={this.state.markedDates}
+            markedDates={markedDates}
             onDayPress={day => {
-              this.onDayPress(day.dateString);
+                onDayPress(day.dateString);
             }}
             style={styles.calendarStyle}
           theme={{
@@ -54,11 +45,11 @@ export default class SetCalendar extends React.Component {
           }}
             />
             {/* <Text style={styles.text}>אין תורים להציג בתאריך זה</Text> */}
-            <Text style={styles.text}>{this.state.selectedDate}</Text>
+            <Text style={styles.text}>{selectedDate}</Text>
           </View>
   );
-}
-}
+};
+
 const styles = StyleSheet.create({
   calendarStyle: {
     paddingTop: 30,

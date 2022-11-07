@@ -4,8 +4,9 @@ import Calendar from '../components/Calendar';
 import Services from '../components/Services';
 import Times from '../components/Times';
 import logo from '../assets/logo-dark.png';
-import { State } from 'react-native-gesture-handler';
 import CustomButton from '../components/CustomButton';
+import { useDispatch } from 'react-redux';
+import { Create_Appointment} from '../../redux/reducers/appointmentSlice';
 
 const categories = [
     {
@@ -27,6 +28,8 @@ const categories = [
 
 export default function Schedule() {
 
+    const dispatch = useDispatch();
+    
     const [showModal, setShowModal] = useState({
         calendar: false,
         services: false,
@@ -35,8 +38,26 @@ export default function Schedule() {
 
     const [actionTriggered, setActionTriggered] = useState('');
 
-    const ModalsTriggered = () => {
+    const [time, setTime] = useState('');
+    const [date, setDate] = useState('');
+    const [service, setService] = useState('');
 
+    const getTime = (time) => {
+        setTime(time);
+        setShowModal((prevState) => ({...prevState, times:false}))
+    };
+
+    const getService = (service) => {
+        setService(service);
+        setShowModal((prevState) => ({...prevState, services:false}))
+    };
+
+    const getDate = (date) => {
+        setDate(date);
+        setShowModal((prevState) => ({...prevState, calendar:false}))
+    };
+
+    const ModalsTriggered = () => {
         return (
             <View style={{
                 flex: 1,
@@ -44,22 +65,36 @@ export default function Schedule() {
                 backgroundColor: 'rgba(0, 0, 0, 0.3)',
             }}>
                 {actionTriggered === '1' ?
-                     <Calendar onXPressed={() => setShowModal({...State, calendar:false})}/> :
+                     <Calendar 
+                        getDate={(e)=> getDate(e)}
+                        onXPressed={() =>  
+                            setShowModal((prevState) => ({...prevState, calendar:false}))}/> :
                 actionTriggered === '2' ?
-                     <Services onXPressed={() => setShowModal({...State, services:false})}/> : 
+                     <Services onXPressed={() =>  
+                        setShowModal((prevState) => ({...prevState, services:false}))}
+                        getService={(e)=> getService(e)}/>
+                        : 
                 actionTriggered === '3' ? 
-                     <Times onXPressed={() => setShowModal({...State, times:false})}/>
+                     <Times 
+                        onXPressed={() =>
+                            setShowModal((prevState) => ({...prevState, times:false}))}
+                        getTime={(e)=> getTime(e)} />
                 : null
                 }
             </View>
-        )}
-    
+        )};
 
     const onPress = (id) => {
         id === 1 ? (setActionTriggered('1'), setShowModal((prevState) => ({...prevState, calendar:true}))) : 
         id === 2 ? (setActionTriggered('2'), setShowModal((prevState) => ({...prevState, services:true}))) :
         (setActionTriggered('3'), setShowModal((prevState) => ({...prevState, times:true})))
-        console.log(actionTriggered)
+    };
+    const handleSchedule = () => {
+        dispatch(Create_Appointment({
+            date: date,
+            service: service,
+            time: time,
+        }))
     };
 
     return (    
@@ -71,19 +106,20 @@ export default function Schedule() {
                    > 
                    {ModalsTriggered()}
             </Modal>
+           <View style={styles.container} >
             {categories.map((item, index) => (
                 <View style={{}} key={index}> 
                     <TouchableOpacity 
                         onPress={() => onPress(item.id)}
-                        style={styles.button}
+                        style={styles.categories}
                         activeOpacity={0.8}>
-                            <Text style={styles.text}>{item.content}</Text>
-                            <View style={styles.verticleLine}></View>
                             <Text style={styles.header}>{item.header}</Text>
+                            <Text style={styles.text}>{item.content}</Text>
                     </TouchableOpacity>
                 </View>
             ))}
-            <CustomButton />
+            <CustomButton style={styles.button} text="להזמנת תור זה" onPress={handleSchedule}/>
+            </View>
         </>
     )
   };
@@ -96,37 +132,41 @@ export default function Schedule() {
         alignSelf: 'center',
         marginBottom: 20,
     },
+    container: {
+        paddingTop: 30,
+        backgroundColor: '#fff', 
+        flex:1, 
+        borderTopLeftRadius: 50,
+        borderTopRightRadius: 50
+    },
     header: {
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 20,
+        fontWeight: '700',
         color: '#b89c47',
         marginRight: 20,
     },
-    button: {
+    categories: {
         alignSelf: 'center',
         backgroundColor: '#fff',
         paddingVertical: 20,
         marginVertical: 15,
-        width: '90%', 
+        width: '80%', 
         shadowColor: "#000",
         shadowOffset: {
           width: 10,
           height: 10,
         },
         elevation: 10, 
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        borderRadius: 5,
+        borderRadius: 10,
     },
     text: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: 'black',
-        marginLeft: 20,
+        fontSize: 16,
+        fontWeight: '500',
+        color: 'grey',
+        alignSelf: 'flex-end',
+        right: 20,
     },
-    verticleLine: {
-        height: '100%',
-        width: 1,
-        backgroundColor: '#181818',
-      }
+    button: {
+        
+    },
 });

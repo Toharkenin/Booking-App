@@ -15,7 +15,7 @@ const BirthDayInput = ({getDate}) => {
         let newDate = moment(selectedDate).format("DD/MM/YYYY");
         setText(newDate);
         setOpen(false);
-        getDate(date);
+        getDate(newDate);
     };
     return (
         <View>
