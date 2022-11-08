@@ -1,8 +1,8 @@
-import { DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
+import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import { selectUser } from '../../redux/reducers/userSlice';
-import Icon from 'react-native-vector-icons/SimpleLineIcons';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector } from 'react-redux';
 
 function CustomDrawr (props) {
@@ -14,9 +14,9 @@ function CustomDrawr (props) {
         <DrawerContentScrollView {...props} >
             <View style={styles.drawerContent}>
               {user ? 
-                <Text style={styles.userName}>היי, {user.firstName} {user.lastName}</Text> : 
-                <Text style={styles.userName}>היי אורח</Text>}
-              <Icon name="user" size={50} color={''} style={styles.userIcon}/>
+                <Text style={styles.userName}>שלום, {user.firstName} {user.lastName}</Text> : 
+                <Text style={styles.userName}>שלום, אורח</Text>}
+              <Icon name="user-circle" size={40} color={'#000'} style={styles.userIcon}/>
             </View>
             <View style={{marginTop: 20}}>
                 <DrawerItemList {...props}/>
@@ -28,7 +28,7 @@ function CustomDrawr (props) {
 
 const styles = StyleSheet.create({
     userIcon: {
-      marginLeft: 20,
+      marginLeft: 15,
     },
     drawerContent: {
       flexDirection: 'row',

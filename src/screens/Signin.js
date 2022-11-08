@@ -29,7 +29,7 @@ export default function Signin( {navigation} ) {
                 name="טלפון-נייד" 
                 maxLength={10}
                 minLength={10}
-                iconName="phone-alt"
+                iconName="phone"
                 keyboardType="numeric"
                 onChangeText={setPhoneNumber}
                 />

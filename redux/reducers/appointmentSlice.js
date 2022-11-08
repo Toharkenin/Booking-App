@@ -16,5 +16,5 @@ export const appointmentSlice = createSlice({
   });
 
   export const {Create_Appointment, Cancle_Appointment} = appointmentSlice.actions;
-  export const Select_Appointment = (state) => state.appointment;
+  export const selectAppointment = (state) => state.appointment;
   export default appointmentSlice.reducer;

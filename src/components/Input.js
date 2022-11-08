@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {View, Text, TextInput, StyleSheet} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function Input(props) {
 
@@ -15,7 +15,7 @@ export default function Input(props) {
                 textAlign='right'
                 autoFocus={props.autoFocus}
                 />
-            <Icon name={props.iconName} size={24} />
+            <Icon name={props.iconName} size={18} color="#000" style={{marginLeft: 5}}/>
         </View>
     )
 }

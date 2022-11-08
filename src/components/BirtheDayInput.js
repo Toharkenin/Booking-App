@@ -23,7 +23,7 @@ const BirthDayInput = ({getDate}) => {
                     style={{width: '100%',alignItems: 'center',
                     flexDirection: 'row',}}
                     value={text}
-                    iconName="calendar-day" 
+                    iconName="calendar" 
                     showSoftInputOnFocus={false}
                     onPressIn={() => setOpen(true)}
                     />

@@ -1,9 +1,9 @@
 import React from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import logo from '../assets/logo-dark.png';
-import { useDispatch, useSelector } from 'react-redux';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useSelector } from 'react-redux';
 import { selectUser } from '../../redux/reducers/userSlice';
+import CustomButton from '../components/CustomButton';
 
 export default function Home ( {navigation} ) {
 
@@ -11,18 +11,24 @@ export default function Home ( {navigation} ) {
     return (
         <View>
             <Image source= {logo} style={styles.logo} resizeMode="center" />
-            {user ? 
-                <Text style={styles.welcomeText}>היי {user.firstName}, שמחים שאתה כאן </Text> : 
-                <Text style={styles.welcomeText}>היי אורח, ברוך הבא!</Text>
-            }
-            {user ? 
-            <TouchableOpacity onPress={navigation.navigate('קביעת תור חדש')} style={styles.btn}>
-                <Text style={styles.btnText}>לחץ לקביעת תור</Text>
-            </TouchableOpacity> : 
-            <TouchableOpacity onPress={navigation.navigate('פתיחת משתמש')} style={styles.btn}>
-                <Text style={styles.btnText}>לחץ לפתיחת משתמש</Text>
-            </TouchableOpacity>
-            }
+            <View style={styles.container}>
+                {user ? 
+                    <Text style={styles.welcomeText}>שלום {user.firstName}, שמחים שאתה כאן </Text> : 
+                    <Text style={styles.welcomeText}>שלום אורח, ברוך הבא!</Text>
+                }
+                <View>
+                    {user ? 
+                    <CustomButton 
+                        onPress={navigation.navigate('קביעת תור חדש')}  
+                        style={styles.btn}
+                        text="לחץ לקביעת תור"/> :
+                    <CustomButton 
+                        onPress={navigation.navigate('הזדהות')}
+                        style={styles.btn}
+                        text="לחץ להתחברות"/>
+                    }
+                </View>
+            </View>
         </View>
     );
   };
@@ -32,6 +38,13 @@ export default function Home ( {navigation} ) {
         height: 130,
         width: 130,
         alignSelf: 'center',
+    },
+    container: {
+       backgroundColor: '#FFFFFF', 
+       borderTopLeftRadius: 50,
+       borderTopRightRadius: 50,
+       marginTop: 20,
+       paddingTop: 20,
     },
     welcomeText: {
         fontSize: 22,

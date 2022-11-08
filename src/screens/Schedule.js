@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity, Image, Modal} from 'react-nati
 import Calendar from '../components/Calendar';
 import Services from '../components/Services';
 import Times from '../components/Times';
+import Confirm from '../components/Confirm';
 import logo from '../assets/logo-dark.png';
 import CustomButton from '../components/CustomButton';
 import { useDispatch } from 'react-redux';
@@ -35,6 +36,7 @@ export default function Schedule() {
         services: false,
         times: false,
     });
+    const [confirmModal, setConfirmModal] = useState(false);
 
     const [actionTriggered, setActionTriggered] = useState('');
 
@@ -95,6 +97,7 @@ export default function Schedule() {
             service: service,
             time: time,
         }))
+        setConfirmModal(true);
     };
 
     return (    

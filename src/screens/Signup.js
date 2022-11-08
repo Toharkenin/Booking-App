@@ -59,18 +59,18 @@ export default function Signup({navigation}) {
             <Image source= {logo} style={styles.logo} resizeMode="center" />
             <Input 
                 name="שם פרטי" 
-                iconName="user-alt" 
+                iconName="user-o" 
                 onChangeText={text => onChange(text, 'firstName')}
                 autoFocus={true}/>                                     
             <Input 
                 name="שם משפחה" 
-                iconName="user-alt"
+                iconName="user-o"
                 onChangeText={text => onChange(text, 'lastName')}/>
             <Input 
                 name="טלפון-נייד" 
                 maxLength={10}
                 minLength={10}
-                iconName="phone-alt"
+                iconName="phone"
                 keyboardType="numeric" 
                 onChangeText={text => onChange(text, 'phoneNumber')}/>
             <BirthDayInput getDate={(e)=>getDate(e)}/>
@@ -97,5 +97,6 @@ export default function Signup({navigation}) {
         fontSize: 18,
         fontWeight: '700',
         alignSelf: 'center',
+        color: '#000'
     },
 });
