@@ -1,20 +1,16 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import Navigation from './Navigation';
+import Home from './src/screens/Home';
+import Signup from './src/screens/Signup';
+import { Provider } from "react-redux";
+import { store } from './redux/store';
+import 'react-native-gesture-handler';
+import AdminNavigator from './AdminNavigator';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+        // <Navigation />
+        <AdminNavigator />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
