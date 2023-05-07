@@ -69,9 +69,18 @@ const styles = StyleSheet.create({
   calendarStyle: {
     paddingBottom: 20,
     shadowColor: "#000",
-    elevation: 5, 
+shadowOffset: {
+	width: 0,
+	height: 1,
+},
+shadowOpacity: 0.18,
+shadowRadius: 1.00,
+
+elevation: 1,
     borderBottomEndRadius: 15,
     borderBottomLeftRadius: 15,
+    marginTop: 80,
+    marginBottom: 15,
   },
   icon: {
     position:'absolute', 

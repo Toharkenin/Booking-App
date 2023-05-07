@@ -1,18 +1,21 @@
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useSelector, useDispatch } from 'react-redux';
 import { Divider } from 'react-native-elements';
-import { logout } from '../../../redux/reducers/userSlice';
+import { useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function CustomDrawr (props) {
+  const user = useSelector((state) => state.user.user);
 
-  const user = useSelector(state => state.user.user);
-  const dispatch = useDispatch();
-  const onSignoutPress = () => {
-    dispatch(logout(user));
-  } 
+  const onSignoutPress = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
     return (
       <View style={{flex: 1}}>

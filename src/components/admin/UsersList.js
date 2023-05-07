@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, FlatList, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, StyleSheet, Text, FlatList, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
 import { Divider } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/Feather';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import AddUser from './AddUser';
 import { db } from '../../../Firebase';
-import {collection, getDoc, deleteDoc, doc, onSnapshot, setDoc} from 'firebase/firestore';
+import {collection, getDoc, deleteDoc, doc, onSnapshot, setDoc, updateDoc} from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Loader from '../user/Loader';
 import Communications from 'react-native-communications';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { set } from '../../../redux/reducers/appointmentSlice';
-import { array } from 'prop-types';
+import { login } from '../../../redux/reducers/userSlice';
+import EditUser from './EditUser';
+import moment from 'moment';
 
 function UsersList ({route}) {
     const [allUsers, setAllUsers] = useState([]);
     const [usersNum, setUsersNum] = useState(0);
     const [createUserModal, setCreateUserModal] = useState(false);
+    const [editUser, setEditUser] = useState(false);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
@@ -28,6 +30,8 @@ function UsersList ({route}) {
 
     const usersCollectionRef = collection(db, 'Users');
     const appointment = useSelector((state) => state.appointmentDetails.appointment);
+    let date;
+    !isUserEditing ? date = moment(appointment.date).format("DD.MM.YYYY") : null;
     
     // get list of users from firebase firestore
     useEffect(() => { 
@@ -42,13 +46,14 @@ function UsersList ({route}) {
                     firstName: documentSnapshot.data().firstName,
                     lastName: documentSnapshot.data().lastName,
                     phoneNumber: documentSnapshot.data().phoneNumber,
+                    numOfEvents: documentSnapshot.data().numOfEvents,
+                    appointments: documentSnapshot.data().appointments,
                 });
                 setAllUsers(users);
             })
             setLoading(false);
         })};
-        getUsers();
-        
+        getUsers(); 
     }, []);
     
 
@@ -64,36 +69,63 @@ function UsersList ({route}) {
         },
         {text: "כן", onPress: async () => {
             await deleteDoc(doc(db, "Users", id));
-            console.log('User deleted!');
         }}])
     };
 
     // create new appointment for a user
-    const onNewAppointmentPressed = async (id) => {
-        setLoading(true);
+    const onNewAppointmentPressed = async (id, apptsArray) => {
         const docRef = doc(db, 'Appointments', appointment.date);
         const docSnap = await getDoc(docRef);
-
+        
+        setLoading(true);
         let events = []
         events = docSnap.data().appointments;
-        events[appointment.index].availiable = false;
+        events[appointment.index].available = false;
         events[appointment.index].userId = id;
         const del = await deleteDoc(doc(db, "Appointments", appointment.date));
         del;
-        console.log(events)
         const update = await setDoc(doc(db, "Appointments", appointment.date), {
             date: appointment.date,
             appointments: events,
         });
         update;
+        createNewAppointment(id, apptsArray);
         setLoading(false);
         navigation.goBack();
+    };
+
+    const createNewAppointment = async (id, appointmentsArray) => {
+        const userRef = doc(db, 'Users', id);
+        let events = [];
+        events = appointmentsArray;
+        events.push({
+            service: appointment.service,
+            date: appointment.date,
+            startTime: appointment.startTime,
+            endTime: appointment.endTime,
+            index: appointment.index,
+        }); 
+        
+        await updateDoc(userRef, {
+            appointments: events,
+        });
     };
 
     const onPhonePressed = (id) => {
         Communications.phonecall(id, true);
     };
-    
+
+    const onEditPressed = (userInfo) => {
+        setEditUser(true);
+        dispatch(login({
+                firstName: userInfo.firstName,
+                lastName: userInfo.lastName,
+                numOfEvents: userInfo.numOfEvents,
+                phoneNumber: userInfo.phoneNumber,
+            })
+        );
+    };
+
 
     return (
         <SafeAreaView style={{backgroundColor: '#fff', flex:1}}>
@@ -112,7 +144,7 @@ function UsersList ({route}) {
             <Divider width={0.5} />
             {isUserEditing ? null : 
                 <>
-                <Text style={styles.dateAndTime}>{appointment.date}</Text>
+                <Text style={styles.dateAndTime}>{date}</Text>
                 <Text style={styles.dateAndTime}>{appointment.startTime} - {appointment.endTime}</Text>
                 </>
             }
@@ -128,11 +160,17 @@ function UsersList ({route}) {
                             <View style={styles.userInfo}>
                                 <Text style={styles.userName}>{item.firstName} {item.lastName}</Text>
                                 <Text style={styles.userPhone}>{item.phoneNumber}</Text>
+                                <Pressable>
+                                    <Text style={styles.numOfEvents}>מספר תורים: {item.numOfEvents}</Text>
+                                </Pressable>
                             </View>
                             {isUserEditing ?
                             <View style={{flexDirection: 'row'}}>
                             <TouchableOpacity onPress={() => onDeleteUserPressed(item.id)}>
-                                <Icon name="trash-alt" size={25} color='#202020' style={styles.icon}/>
+                                <Icon name="user-minus" size={25} color='#202020' style={styles.icon}/>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => onEditPressed(item)}>
+                                <Icon name="edit" size={25} color='#202020' style={styles.icon}/>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => onPhonePressed(item.id)}>
                                 <Icon name="phone" size={25} color='#202020' style={styles.icon}/>
@@ -140,8 +178,8 @@ function UsersList ({route}) {
                             </View>
                                 : 
                                 <View style={{flexDirection: 'row'}}>
-                                    <TouchableOpacity onPress={() => onNewAppointmentPressed(item.id)}>
-                                        <Icon name="calendar-plus" size={25} color='#202020' style={styles.icon}/>
+                                    <TouchableOpacity onPress={() => onNewAppointmentPressed(item.id, item.appointments)}>
+                                        <Icon name="calendar" size={25} color='#202020' style={styles.icon}/>
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={() => onPhonePressed(item.id)}>
                                         <Icon name="phone" size={25} color='#202020' style={styles.icon}/>
@@ -153,6 +191,8 @@ function UsersList ({route}) {
                     </>
             )} />
             {loading ? <Loader /> : null}
+            {editUser ? <EditUser 
+                onClosePress={() => setEditUser(false)} /> : null}
         </SafeAreaView>
     )
 }
@@ -177,17 +217,21 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
         color: '#000',
-        marginBottom: 10,
+        marginBottom: 5,
     },
     dateAndTime: {
         fontSize: 16,
         padding: 7,
         alignSelf: 'center',
     },
-    userPhoneNumber:{
+    userPhone:{
         fontSize:  16,
         color: '#000',
-        fontWeight: '900',
+        fontWeight: '500',
+    },
+    numOfEvents: {
+        marginTop: 3,
+
     },
     icon: {
         marginHorizontal: 10,

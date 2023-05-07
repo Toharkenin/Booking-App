@@ -1,22 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, useWindowDimensions, TouchableOpacity} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons'
+import { useSelector } from 'react-redux';
+import moment from 'moment';
 
 export default function AppointmentDetails(props) {
 
     const {height, width} = useWindowDimensions();
+    const appointment = useSelector((state) => state.appointmentDetails.appointment);
+    let date = moment(appointment.date).format("DD.MM.YYYY");
     return (
         <View style={[styles.container, {height,width}]}>
             <View style={styles.message}>
-                 <Text style={styles.primaryText}>24.6.23</Text>
-                 <Text style={styles.text2}>10:00 - 10:15</Text>
-                 <Text style={styles.text2}>טוהר קנין</Text>
-                 <Text style={styles.text2}>0558820156</Text>
-            <View style={{flexDirection: 'row'}}>
-                <TouchableOpacity style={{backgroundColor: '#E0AA3E'}} onPress={props.onCanclePress}>
+            <TouchableOpacity onPress={props.onClosePress} style={styles.icon}>
+                  <Icon name="close-outline" size={40} color="#E0AA3E" />
+              </TouchableOpacity>
+              <View style={{alignItems: 'center'}}>
+                <Text style={styles.primaryText}>{appointment.userFirstName} {appointment.userLastName}</Text>
+                 <Text style={styles.secText}>{date}</Text>
+                 <Text style={styles.secText}>{appointment.startTime} - {appointment.endTime}</Text>
+                <TouchableOpacity style={styles.button} onPress={props.onCanclePress}>
                     <Text>ביטול תור</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{backgroundColor: '#E0AA3E'}} onPress={props.onClosePress}>
-                    <Text>סגירה</Text>
                 </TouchableOpacity>
             </View>
             </View>
@@ -39,7 +43,7 @@ const styles = StyleSheet.create({
         width: '80%',
         padding: 30,
         borderRadius: 10,
-        alignItems: 'center',
+        // alignItems: 'center',
     },
     checkmark: {
         height: 80,
@@ -49,11 +53,25 @@ const styles = StyleSheet.create({
     primaryText: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginTop: 20,
+        marginBottom: 10,
 
     },
     secText: {
         fontSize: 16,
-        marginTop: 20,
-    }
+        fontWeight: '500',
+        marginBottom: 5,
+    },
+    button: {
+        backgroundColor: '#E0AA3E',
+        marginTop: 30,
+        paddingHorizontal: 20,
+        paddingVertical: 7,
+        borderRadius: 10,
+    },
+    icon: {
+        position:'absolute', 
+        zIndex: 999, 
+        marginTop: 5,
+        marginLeft: 5,
+      },
  });

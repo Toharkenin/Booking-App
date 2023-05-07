@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Text, Image, StyleSheet, TouchableOpacity, ScrollView, View, Alert, SafeAreaView} from 'react-native';
+import { Text, Image, StyleSheet, ScrollView, View, Alert, SafeAreaView, Pressable} from 'react-native';
 import logo from '../assets/logo-dark.png';
 import Input from '../components/user/Input';
 import CustomButton from '../components/user/CustomButton';
@@ -9,9 +9,10 @@ import { useDispatch } from 'react-redux';
 import { login } from '../../redux/reducers/userSlice';
 import { db, app } from '../../Firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { getAuth, signInWithPhoneNumber } from 'firebase/auth';
+import { getAuth, signInWithPhoneNumber, getCodeFromUserInput } from 'firebase/auth';
 import Loader from '../components/user/Loader';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Signup({navigation}) {
 
@@ -23,8 +24,6 @@ export default function Signup({navigation}) {
     const [birthDay, setBirthDay]= useState("");
     const [loading, setLoading]= useState(false);
     const [welcomeMessage, setWelcomeMessage]= useState(false);
-    const [verificationId, setVerificationId] = useState(null);
-    // const [confirm, setConfirm] = useState(null);
     const [displayOTPInput, setDisplayOTPInput] = useState(false);
     const dispatch = useDispatch();
     const [code, setCode] = useState('');
@@ -46,9 +45,9 @@ export default function Signup({navigation}) {
         if (!inputs.firstName ||
             !inputs.lastName || 
             !birthDay ||
-            inputs.phoneNumber.toString().length < 10 
-            // inputs.phoneNumber.toString()[0] !== "0" ||
-            // inputs.phoneNumber.toString()[1] !== "5"
+            inputs.phoneNumber.toString().length < 10 ||
+            inputs.phoneNumber.toString()[0] !== "0" ||
+            inputs.phoneNumber.toString()[1] !== "5"
             ) {
             return <CustomButton text="המשך" disabled />
         } else {
@@ -56,14 +55,21 @@ export default function Signup({navigation}) {
         }
     }
 
-    const setRedux = () => {
-        dispatch(login({
+    const storeUser = async () => {
+        const value = {
             firstName: inputs.firstName,
             lastName: inputs.lastName,
             phoneNumber: inputs.phoneNumber,
             birthDay: birthDay,
-            loggedIn: true,
-        }));
+            loggedIn: true,}
+        dispatch(login(
+            value
+        ));
+        try {
+            await AsyncStorage.setItem("user", JSON.stringify(value));
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     //add user to firebase depending on phone number existance in the db
@@ -82,97 +88,57 @@ export default function Signup({navigation}) {
                      navigation.navigate('הזדהות');
                 }}])
           } else {
-                // const newUser = await setDoc(doc(db, 'Users', inputs.phoneNumber),
-                // {
-                //     firstName: inputs.firstName,
-                //     lastName: inputs.lastName,
-                //     phoneNumber: inputs.phoneNumber,
-                //     birthDay: birthDay,
-                //     numOfEvents: 1
-                // })
-                // newUser;
                 requestOTP();
-                // setRedux();
                 setLoading(false);
           }
-          
-    //         if (snapshot.empty) {
-    //             firestore()
-    //             .collection('Users')
-    //             .add({
-    //                 firstName: inputs.firstName,
-    //                 lastName: inputs.lastName,
-    //                 phoneNumber: inputs.phoneNumber,
-    //                 birthDay: birthDay,
-    //             })
-    //             .then(() => {
-    //                 // requestOTP();
-    //                 setRedux();
-    //                 console.log('worked');
-    //                 setLoading(false);
-    //             })
-    //         } else {
-    //             setLoading(false);
-    //             Alert.alert('אופס...', 'מספר הטלפון כבר קיים במערכת',
-    //             [{
-    //                 text: 'סגירה'
-    //             },
-    //             {text: 'להתחברות',
-    //             onPress: () => {
-    //                 navigation.navigate('הזדהות');
-    //             }}])
-    //         }})  
-        };
+
+    const resetForm = () => {
+        setInputs.firstName("");
+        setInputs.lastName("");  
+        setInputs.phoneNumber("");
+        setBirthDay("");
+    }};
 
     const requestOTP = async () => {
-        // const phoneProvider = new PhoneAuthProvider(auth);
-        // signInWithPhoneNumber(
-        //     auth, 
-        //     countryCode + inputs.phoneNumber, 
-        //     recaptchaVerifier.current)
-        //         .then((confirmationResult) => {
-        //             setVerificationId(confirmationResult);
-        //             setDisplayOTPInput(true);
-        //         }).catch((error) => {
-        //             console.log('no SMS', error);
-        // });
         const auth = getAuth();
         setDisplayOTPInput(true);
         signInWithPhoneNumber(auth, countryCode+inputs.phoneNumber, recaptchaVerifier.current)
             .then((confirmationResult) => {
                 console.log('c...', confirmationResult);
-                setCode(confirmationResult)
+                window.confirmationResult = confirmationResult;
+            }).catch((error) => {
+                console.log('ee', error)
             })
-
-        // phoneProvider
-        // .verifyPhoneNumber(countryCode+inputs.phoneNumber, recaptchaVerifier.current)
-        // .then(setVerificationId);
-        // signInWithPhoneNumber(authentication, `${countryCode}${inputs.phoneNumber}`, appVerifier)
-        // .then((confirmationResult) => {
-        //     window.confirmationResult = confirmationResult;
-        // }).catch((error) => {
-        //     console.log(error);
-        // });
-        // const confirmation = await auth().signInWithPhoneNumber(countryCode+inputs.phoneNumber);
-        // setConfirm(confirmation);
     }
     
-    const onSignupPressed = async () => {
-        try {
-            await confirm.confirm(code);
-            setWelcomeMessage(true);
-        } catch (error) {
-            console.log('Invalid code.');
-        }
-        // confirmationResult.confirm(code).then((result) => {
-        // // User signed in successfully.
-        
-        // // ...
-        // }).catch((error) => {
-        // // User couldn't sign in (bad verification code?)
-        // // ...
-        // });
+    const onSignupPressed = () => {
 
+            confirmationResult.confirm(code).then((result) => {
+                console.log('kk', result)
+                setWelcomeMessage(true);
+                const newUser = setDoc(doc(db, 'Users', inputs.phoneNumber),
+                    {
+                        firstName: inputs.firstName,
+                        lastName: inputs.lastName,
+                        phoneNumber: inputs.phoneNumber,
+                        birthDay: birthDay,
+                        appointments: [],
+                        numOfEvents: 1,
+                        isAdmin: false,
+                    })
+                newUser;  
+                storeUser(); 
+                setTimeout(() => {
+                    setWelcomeMessage(false);
+                    setCode("");
+                 }, 4000);
+              }).catch((error) => {
+                Alert.alert('אופס...', 'הקוד שהקשת אינו תקין',
+                [{
+                    text: 'סגירה'
+                }]
+              )});
+               
     }
 
     return (
@@ -202,18 +168,18 @@ export default function Signup({navigation}) {
                 onChangeText={text => onChange(text, 'lastName')}/>
             <Input 
                 name="טלפון-נייד" 
-                // maxLength={10}
+                maxLength={10}
                 minLength={10}
                 iconName="phone"
-                // keyboardType="numeric" 
+                keyboardType="numeric" 
                 onChangeText={text => onChange(text, 'phoneNumber')}/>
             <BirthDayInput getDate={(e)=>getDate(e)}/>
         </View>
             <SubmitButton onPress={(e) => handleSubmit(e)} />
             <View style={styles.textContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('הזדהות')}>
+                <Pressable onPress={() => navigation.navigate('Signin')}>
                         <Text style={styles.primText}>לחץ להתחברות</Text>
-                </TouchableOpacity>
+                </Pressable>
             </View>
         </> : 
          <View style={{marginTop: 30}}>
@@ -226,16 +192,16 @@ export default function Signup({navigation}) {
              onChangeText={setCode}
          />
          <CustomButton text="התחברות" onPress={()=>onSignupPressed()}/>
-         <TouchableOpacity onPress={()=>requestOTP()}>
+         <Pressable onPress={()=>requestOTP()}>
              <Text style={styles.primText}>
                  לא קיבלתי קוד, שלחו לי שוב
              </Text>
-         </TouchableOpacity>
-         <TouchableOpacity onPress={() => setDisplayOTPInput(false)}>
+         </Pressable>
+         <Pressable onPress={() => setDisplayOTPInput(false)}>
              <Text style={styles.secText}>
                  חזרה לפתיחת משתמש
              </Text>
-         </TouchableOpacity>
+         </Pressable>
          </View>
     }
         </ScrollView>

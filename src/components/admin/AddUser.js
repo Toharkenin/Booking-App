@@ -108,11 +108,11 @@ export default function AddUser(props) {
                     onChangeText={text => onChange(text, 'phoneNumber')}
                     />
                 <BirthDayInput getDate={(e)=>getDate(e)}/>
-                <CustomButton text="הוספה" onPress={()=>handleSubmit()}/>
+                <CustomButton text="הוספה" onPress={()=>handleSubmit()} style={{marginTop: 50}}/>
                 </> : 
                     <>
                     <Text style={styles.header}>הזן את הקוד שקיבלת</Text>
-                    <Input 
+                    <Input
                         value={code}
                         name="קוד" 
                         iconName2="message-processing-outline"

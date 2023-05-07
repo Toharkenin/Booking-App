@@ -22,7 +22,7 @@ export function createAppointmentsList(appt) {
         appointments.push({
             startTime: `${Math.floor(startTime / 100)}:${startTime % 100}`,
             endTime: `${Math.floor(endTime / 100)}:${endTime % 100}`,
-            availiable: true,
+            available: true,
             userId: "",
             index: index,
         });

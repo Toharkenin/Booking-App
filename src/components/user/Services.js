@@ -1,46 +1,61 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React from 'react';
+import {View, Text, StyleSheet, Pressable} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons'
 
 
-export default function Services({getService}) {
-  const [serviceType, setServiceType] = useState("");
+const servicesArray = [
+  {name: 'תספורת'},
+  {name: 'תספורת וזקן'},
+  {name: 'תספורת ושעווה'}
+]
+
+export default function Services({getService, onXPressed}) {
+
   const onServicePressed = (service) => {
-      setServiceType(service);
-      getService(serviceType);
+      getService(service);
   }
 
     return(
         <View style={styles.container}>
+          <Pressable onPress={onXPressed} style={styles.icon}>
+                  <Icon name="close-outline" size={40} color="#E0AA3E" />
+          </Pressable>
+          <View style={{paddingBottom: 40}}>
          <Text style={styles.header}>איזה טיפול תרצה לבחור?</Text>
-        <View style={{flexDirection: 'row', justifyContent:'space-around'}}>
-            <Service color="#3ee0aa" text='תספורת' onPress={() => onServicePressed('תספורת')}/>
-            <Service color="#fbf3e5" text='תספורת + זקן' onPress={() =>onServicePressed('תספורת + זקן')}/>
-            <Service color="#E0AA3E" text='תספורת + שעווה' onPress={() =>onServicePressed('תספורת + שעווה')}/>
-        </View>
+        {servicesArray.map((item, index) => (
+              <Pressable 
+                  key={index} 
+                  style={styles.btn}
+                  onPress={() => onServicePressed(item.name)}>
+                  <Text style={styles.btnText}>{item.name}</Text>
+              </Pressable>
+          ))}
+          </View>
         </View>
     )
   };
 
 const Service = (props) => {
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={props.onPress}>
+    <Pressable activeOpacity={0.9} onPress={props.onPress}>
       <View style={[{backgroundColor: props.color}, styles.btn]} >
         <Text style={styles.btnText}>{props.text}</Text>
       </View>     
-    </TouchableOpacity>
+    </Pressable>
   )
 }
 
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     paddingVertical: 16,
     marginTop: 15,
-    borderRadius: 15,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
     shadowColor: "#000",
     shadowOffset: {
-      width: 0,
+      width: 10,
       height: 12,
     },
     shadowOpacity: 0.58,
@@ -49,20 +64,26 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 18,
-    fontFamily: "Helvetica",
     fontWeight: '800',
     alignSelf: 'center',
-    marginTop: 10,
+    // marginTop: 10,
     color: '#000'
   },
   btn: {
+    backgroundColor: '#fff',
     alignSelf: 'center',
-    shadowColor: "#000",
-    elevation: 1, 
     marginTop: 20,
     width: 120,
-    borderRadius: 5,
+    borderRadius: 10,
     paddingVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+	  width: 0,
+	  height: 1,
+  },
+  shadowOpacity: 0.22,
+  shadowRadius: 2.22,
+  elevation: 3,
   },
   btnText: {
     fontSize: 16,

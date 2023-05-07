@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { StyleSheet } from 'react-native';
 import { createDrawerNavigator, DrawerToggleButton } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomDrawer from './src/components/user/CustomDrawer';
@@ -9,25 +10,32 @@ import Appointments from './src/screens/Appointments';
 import Signup from './src/screens/Signup';
 import Signin from './src/screens/Signin';
 import Schedule from './src/screens/Schedule';
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { store } from './redux/store';
 import 'react-native-gesture-handler';
+import UserInfo from './src/screens/UserInfo';
 
 const Drawer = createDrawerNavigator();
-const Navigation = () => {
-     
+
+export const Navigation = () => {
+    const [user, setUser] = useState('');
+    const dispatch = useDispatch(); 
+
     const screenOptions = {
         drawerPosition: "right",
         headerTintColor: '#fff',
         headerStyle: {
              backgroundColor: "#fff"       
         },
+        drawerType: 'front',
         headerLeft: () => <DrawerToggleButton />,
         drawerLableStyle: {
             marginTop: 20,
         },
         drawerActiveBackgroundColor: '#fff',
-        drawerActiveTintColor: '#000',   
+        drawerActiveTintColor: '#000',  
+        // headerShown: false,
+        headerTransparent:true,
     }
     
     return (
@@ -41,19 +49,13 @@ const Navigation = () => {
             name='בית'
             component={Home}
             options={{
-                drawerIcon: () => <Icon name="ios-person-outline" size={22} style={styles.icons}/>
-            }} />
-             <Drawer.Screen 
-            name='פתיחת משתמש' 
-            component={Signup} 
-            options={{
-                drawerIcon: () => <Icon name="ios-person-outline" size={22} style={styles.icons}/>
+                drawerIcon: () => <Icon name="home" size={22} style={styles.icons}/>
             }} />
             <Drawer.Screen 
-                name='הזדהות' 
-                component={Signin} 
+                name='משתמש' 
+                component={UserInfo} 
                 options={{
-                    drawerIcon: () => <Icon name="ios-phone-portrait-outline" size={22} style={styles.icons}/>
+                    drawerIcon: () => <Icon name="ios-person-outline" size={22} style={styles.icons}/>
             }}/>
             <Drawer.Screen 
                 name='קביעת תור חדש' 
@@ -62,7 +64,7 @@ const Navigation = () => {
                     drawerIcon: () => <Icon name="md-calendar-sharp" size={22} style={styles.icons}/>
             }}/>
             <Drawer.Screen 
-                name='התורים שלך' 
+                name='התורים שלי' 
                 component={Appointments}
                 options={{
                     drawerIcon: () => <Icon name="ios-checkmark-done-sharp" size={22} style={styles.icons}/>
@@ -73,71 +75,24 @@ const Navigation = () => {
     );
   };
 
-export default Navigation;
+  export const SignedoutNavigator = () => {
+    const Stack = createStackNavigator();
+    return (
+        <Provider store={store}>
+            <NavigationContainer>
+                <Stack.Navigator initialRouteName="Signin" >
+                    <Stack.Screen name="Signin" component={Signin} options={{headerShown:null}}/>
+                    <Stack.Screen name="Signup" component={Signup} options={{
+                         title: null, headerShown: null
+                    }}/>
+                </Stack.Navigator>
+            </NavigationContainer>
+        </Provider>
+    );
+  };
 
-//   export const SignedoutNavigator = () => {
 
-//     const Drawer = createDrawerNavigator();
-//     const screenOptions = {
-//         drawerPosition: "right",
-//         headerTintColor: '#fff',
-//         headerStyle: {
-//              backgroundColor: "#fff"       
-//         },
-//         headerLeft: () => <DrawerToggleButton 
-//         />,
-//         drawerLableStyle: {
-//             marginTop: 20,
-//         },
-//         drawerActiveBackgroundColor: '#fff',
-//         drawerActiveTintColor: '#000',
-        
-//     };
-//     return (
-//         <Provider store={store}>
-//         <NavigationContainer>
-//         <Drawer.Navigator
-//             drawerContent={(props) => <CustomDrawer {...props}/>}
-//             screenOptions={screenOptions}
-//             initialRouteName="בית"
-//             >
-//         <Drawer.Screen 
-//             name='בית' 
-//             options={{
-//                 drawerIcon: () => <Icon name="ios-person-outline" size={22} style={styles.icons}/>
-//             }} 
-//             component={Home} />        
-//         <Drawer.Screen 
-//             name='פתיחת משתמש' 
-//             component={Signup} 
-//             options={{
-//                 drawerIcon: () => <Icon name="ios-person-outline" size={22} style={styles.icons}/>
-//             }} />
-//             <Drawer.Screen 
-//                 name='הזדהות' 
-//                 component={Signin} 
-//                 options={{
-//                     drawerIcon: () => <Icon name="ios-phone-portrait-outline" size={22} style={styles.icons}/>
-//             }}/>
-//             <Drawer.Screen 
-//                 name='קביעת תור חדש' 
-//                 component={Schedule} 
-//                 options={{
-//                     drawerIcon: () => <Icon name="md-calendar-sharp" size={22} style={styles.icons}/>
-//                 }}/>
-//             <Drawer.Screen 
-//                 name='התורים שלך' 
-//                 component={Appointments}
-//                 options={{
-//                     drawerIcon: () => <Icon name="ios-checkmark-done-sharp" size={22} style={styles.icons}/>
-//                 }}/>
-//             </Drawer.Navigator>
-//         </NavigationContainer>
-//         </Provider>
-//     )
-//   };
-
- const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
     icons: {
         alignSelf: "center",
         position: "absolute",

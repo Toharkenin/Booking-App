@@ -1,53 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, Pressable } from 'react-native';
 import { useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons'
 import LottieView from 'lottie-react-native';
 import { db } from '../../../Firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import Loader from './Loader';
 
 export default function Times({getTime, onXPressed}) {
     const [docExists, setDocExists] = useState(true);
-    const date = useSelector(state => state.appts.date);
-    const [events, setEvents] = useState([]);
+    const [appointmentsList, setAppointmentsList] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const date = useSelector(state => state.appts.date.date);
+    let events = [];
 
-    const onTimePressed = (startTime, endTime) => {
-        getTime(startTime, endTime);
+    const onTimePressed = (startTime, endTime, index) => {
+        getTime(startTime, endTime, index);
     };
-
-    // const response = firestore().collection('AppointmentsByDate');
-    // useEffect(() => {
-    //   try{
-    //   response.doc(date.date)
-    //   .get().then(doc => {
-    //     if (doc.exists) {
-    //       setEvents(doc.data().appointments);
-    //       setDocExists(true);
-    //     } else {
-    //       setDocExists(false);
-    //     }})} catch{ error=>
-    //       console.log('error', error)
-
-    //     }
-    //   }, []);
+ 
+    useEffect(() => {
+      const fetchData = async () => {
+        setLoading(true);
+          const docRef = doc(db, 'Appointments', date);
+          const docSnap = await getDoc(docRef);
+          let counter = 0;
+          if (docSnap.exists()) {
+            while (counter < docSnap.data().appointments.length){
+              if(docSnap.data().appointments[counter].available === true) {
+                  events.push(
+                    docSnap.data().appointments[counter],
+                  )
+              }
+              counter++;
+            };
+            setAppointmentsList(events);
+            setLoading(false);
+            setDocExists(true);
+          } else {
+            setLoading(false);
+            setDocExists(false);
+          }
+          if(docSnap.exists() && events.length === 0) {
+              setDocExists(false);
+          }
+      }
+      fetchData()
+      }, []);
     
     return (  
         <View style={styles.container}>
-              <TouchableOpacity onPress={onXPressed} style={styles.icon}>
+              <Pressable onPress={onXPressed} style={styles.icon}>
                   <Icon name="close-outline" size={40} color="#E0AA3E" />
-              </TouchableOpacity>
-              {
+              </Pressable>
+              {loading ? <Loader/> :
                 docExists ? 
                 <>
                   <Text style={styles.header}>לאיזה שעה תרצה לקבוע?</Text>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                      {events.map((item, index) => (
-                          <TouchableOpacity 
+                      {appointmentsList.map((item, index) => (
+                          <Pressable 
                               key={index} 
                               style={styles.btn}
-                              onPress={() => onTimePressed(item.startTime, item.endTime)}>
+                              onPress={() => onTimePressed(item.startTime, item.endTime, item.index)}>
                               <Text style={styles.btnText}>{item.startTime}-{item.endTime}</Text>
-                          </TouchableOpacity>
+                          </Pressable>
                       ))}
                   </ScrollView>
                 </> :
@@ -78,7 +94,6 @@ const styles = StyleSheet.create({
       },
       header: {
         fontSize: 18,
-        fontFamily: "Helvetica",
         fontWeight: '800',
         alignSelf: 'center',
         marginTop: 10,

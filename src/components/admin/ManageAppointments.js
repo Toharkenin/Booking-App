@@ -113,7 +113,7 @@ export default function ManageAppointments() {
              text: 'סגירה'
          }])}
       else {    
-         docExistsValidation();
+         // docExistsValidation();
       }
    };
    
@@ -167,7 +167,7 @@ export default function ManageAppointments() {
                         value={inputValues.closingTime} />
                   </View>
                </View>
-               <CustomButton text='אישור' onPress={validation}/>
+               <CustomButton text='אישור' onPress={validation} style={{marginTop: 100}}/>
             </> : null
             }
          </ScrollView>
@@ -242,7 +242,7 @@ const DaysCheckBox = (props) => {
          { open ? <DateTimePicker 
             value={new Date()}
             mode="time"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display={'default'}
             onChange={onChange}
             /> : null }
       </View>

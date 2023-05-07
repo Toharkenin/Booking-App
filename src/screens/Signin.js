@@ -1,26 +1,33 @@
 import React, { useState, useRef } from 'react';
 import {View, Text, StyleSheet, Image, Pressable, 
-    Keyboard, ScrollView, Alert} from 'react-native';
+    Keyboard, ScrollView, Alert, SafeAreaView} from 'react-native';
 import Input from '../components/user/Input';
 import CustomButton from '../components/user/CustomButton';
 import logo from '../assets/logo-dark.png';
 import Loader from '../components/user/Loader';
 import Popup from '../components/user/Popup';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../redux/reducers/userSlice';
 import { db, app } from '../../Firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { signInWithPhoneNumber, getAuth } from 'firebase/auth'
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Signin( {navigation} ) {
 
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [confirm, setConfirm] = useState(null);
     const [displayOTPInput, setDisplayOTPInput] = useState(false);
     const [code, setCode] = useState("");
     const [loading, setLoading]= useState(false);
     const [welcomeMessage, setWelcomeMessage]= useState(false);
+    const [userInfo, setUserInfo]= useState({});
+    const user = useSelector((state) => state.user.user);
+    
 
     const recaptchaVerifier = useRef(null);
+    const dispatch = useDispatch();
 
     const countryCode = '+972'
 
@@ -34,21 +41,15 @@ export default function Signin( {navigation} ) {
             Keyboard.dismiss();
             return <CustomButton text="שלחו לי סיסמא ב-SMS" onPress={()=>hendleOTPRequest()} />
         }
-    }
-    // onPress handle to request OTP
-    const requestOTP = async () => {
-        const auth = getAuth();
-        setDisplayOTPInput(true);
-        signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier.current)
-            .then((confirmationResult) => {
-                console.log('c...', confirmationResult);
-                setCode(confirmationResult)
-            })
-        // phoneProvider
-        // .verifyPhoneNumber(countryCode+phoneNumber, recaptchaVerifier.current)
-        // .then(setVerificationId);
-        // const confirmation = await auth().signInWithPhoneNumber(countryCode+phoneNumber);
-        // setConfirm(confirmation);
+    };
+
+    const storeUser = async () => {
+        const value = userInfo;
+        try {
+            await AsyncStorage.setItem("user", JSON.stringify(value));
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     // checks if the phone number exists in the db, and sensd OTP request
@@ -65,48 +66,59 @@ export default function Signin( {navigation} ) {
                 {text: 'להרשמה',
                 onPress: () => {
                      navigation.navigate('פתיחת משתמש');
-                }}])
+                }}]) 
           } else {
+            setUserInfo({
+                firstName: docSnap.data().firstName,
+                lastName: docSnap.data().lastName,
+                phoneNumber: docSnap.data().phoneNumber,
+                birthDay: docSnap.data().birthDay,
+                isAdmin: docSnap.data().isAdmin,
+            });
             requestOTP();
           };
           setLoading(false);
-    }
+    };
+    
+    // onPress handle to request OTP
+    const requestOTP = async () => {
+        const auth = getAuth();
+        setDisplayOTPInput(true);
+        signInWithPhoneNumber(auth, countryCode+phoneNumber, recaptchaVerifier.current)
+            .then((confirmationResult) => {
+                console.log('c...', confirmationResult);
+                window.confirmationResult = confirmationResult;
+            }).catch((error) => {
+                console.log('ee', error)
+            })
+    };
 
     // handle signin pressed
     const onSigninPressed = async () => {
-        setLoading(true);
-        try {
-            await confirm.confirm(code).
-            then(() => {
-                setLoading(false);
-                setWelcomeMessage(true);
-                setTimeout(() => {
-                    navigation.navigate('קביעת תור חדש');
-                }, 4000)
-            })  
-        } catch (error) {
-            console.log('Invalid code.');
-            setLoading(false);
-                Alert.alert('אופס...', 'הקוד שהוזן אינו תקין',
-                [{
-                    text: 'סגירה'
-                },
-                {text: 'להתחברות',
-                onPress: () => {
-                    navigation.navigate('הזדהות');
-                }},
-                {text: 'להרשמה',
-                onPress: () => {
-                    navigation.navigate('פתיחת משתמש');
-
-                }}])
-        }
+        // setLoading(true);
+        confirmationResult.confirm(code).then((result) => {
+            setWelcomeMessage(true); 
+            storeUser(); 
+            setTimeout(() => {
+                setWelcomeMessage(false);
+                dispatch(login(userInfo)); 
+                setCode("");
+             }, 4000);
+          }).catch((error) => {
+            Alert.alert('אופס...', 'הקוד שהקשת אינו תקין',
+            [{
+                text: 'סגירה'
+            }]
+          )});
     }
 
     return(
-        <ScrollView style={{backgroundColor: '#fff', flex:1}}>
+        <SafeAreaView style={{backgroundColor: '#fff', flex:1}}>
             {loading ? <Loader/> : null }
-            {welcomeMessage ? <Popup /> : null }
+            {welcomeMessage ? <Popup
+                text1="שמחים שחזרת!" 
+                text2="מיד תעבור לעמוד..."/> : null }
+        <ScrollView >
             <FirebaseRecaptchaVerifierModal
                 ref={recaptchaVerifier}
                 firebaseConfig={app.options}
@@ -127,6 +139,11 @@ export default function Signin( {navigation} ) {
                     onChangeText={setPhoneNumber} />
             </View>
             <SubmitButton />
+            <View style={styles.textContainer}>
+                <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                        <Text style={styles.primText}>לחץ ליצירת חשבון</Text>
+                </TouchableOpacity>
+            </View>
             </> : 
             <>
                 <Text style={styles.text}>הזן את הקוד שקיבלת</Text>
@@ -144,9 +161,13 @@ export default function Signin( {navigation} ) {
                         לא קיבלתי קוד, שלחו לי שוב
                     </Text>
                 </Pressable>
+                <TouchableOpacity onPress={() => setDisplayOTPInput(false)}>
+                        <Text style={styles.primText}>חזרה להתחברות</Text>
+                </TouchableOpacity>
             </>
             }
         </ScrollView>
+        </SafeAreaView>
     )
   };
 
@@ -158,6 +179,18 @@ const styles = StyleSheet.create({
         marginTop: 30,
         marginBottom: 10,
         color: 'black',
+    },
+    textContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    primText: {
+        marginTop: 20,
+        fontSize: 18,
+        alignSelf: 'center',
+        color: '#000',
+        marginRight: 5,
+        color: '#E0AA3E'
     },
     logo: {
         height: 140,

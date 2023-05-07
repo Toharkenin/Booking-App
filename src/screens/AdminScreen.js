@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Pressable} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Pressable, Alert} from 'react-native';
 import { Agenda } from 'react-native-calendars';
 import FooterMenu from '../components/admin/FooterMenu';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Services from '../components/user/Services';
 import Loader from '../components/user/Loader';
 import { db } from '../../Firebase';
-import { getDoc, doc } from 'firebase/firestore';
+import { getDoc, doc, collection, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { set } from '../../redux/reducers/appointmentSlice';
 import AppointmentDetails from '../components/admin/AppointmentDetails';
@@ -16,74 +17,158 @@ export default function AdminScreen() {
     //hook for appointments in the calendar
     const [appointments, setAppointments] = useState({});
     const navigation = useNavigation();
-    const [appointmentsList, setAppointmentsList] = useState([]);
     const [date, setDate] = useState("");
     const [loading, setLoading] = useState(false);
+    const [service, setService] = useState('');
+    const [deleteButton, setDeleteButton] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
+    const [chooseService, setChooseService] = useState(false);
+    const [apptDetails, setApptDetails] = useState({
+        startTime: '',
+        endTime: '',
+        available: '',
+        index: '',
+    });
+
     const dispatch = useDispatch();
     const appointment = useSelector((state) => state.appointmentDetails.appointment);
 
-    const onDayPress = async (day) => {
-        setLoading(true);
-        setDate(day.dateString);
-        const docRef = doc(db, "Appointments", day.dateString);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            let events = []
-            events = docSnap.data().appointments;
-            setAppointmentsList(events);
-            setAppointments((prev) => ({...prev, [day.dateString]: appointmentsList}))
-          } else {
-            console.log("No such document!");
-          }
-        setLoading(false);
+    useEffect(() => {
+        const getAppts = async () => {
+            setLoading(true);
+            const collectionRef = collection(db, "Appointments");
+            // const querySnapshot = await getDocs(collectionRef);
+            onSnapshot(collectionRef, (querySnapshot) => {
+                querySnapshot.forEach(doc => {
+                let events = doc.data().appointments;
+                let date = doc.id;
+                setAppointments((prev) => ({...prev, [date]: events}));
+            })});
+            setLoading(false);
+        };
+        getAppts();
+    }, []);
+
+    const onCreateApptPressed = (start, end, available, index) => {
+        setChooseService(true);
+        setApptDetails((prevState) => ({...prevState, ['startTime']:start}));
+        setApptDetails((prevState) => ({...prevState, ['endTime']:end}));
+        setApptDetails((prevState) => ({...prevState, ['available']:available}));
+        setApptDetails((prevState) => ({...prevState, ['index']:index}));
     };
 
-    const onCreateApptPressed = (start, end, availiable, index) => {
+    const onExistingApptPresed = async (start, end, available, index, userId) => {
+        const docRef = doc(db, 'Users', userId);
+        const docSnap = await getDoc(docRef);
+
         dispatch(set({
             startTime: start,
             endTime: end,
-            availiable: availiable,
-            date: date,
+            available: available,
+            date: date.dateString,
             index: index,
+            userId: docSnap.data().phoneNumber,
+            userFirstName: docSnap.data().firstName,
+            userLastName: docSnap.data().lastName,
+        }))
+        setShowPopup(true);
+    };
+
+    const getService = (service) => {
+        setService(service);
+        setChooseService(false);
+        console.log('gtt', apptDetails.startTime, apptDetails.endTime, apptDetails.index)
+        dispatch(set({
+            startTime: apptDetails.startTime,
+            endTime: apptDetails.endTime,
+            available: apptDetails.available,
+            date: date.dateString,
+            index: apptDetails.index,
+            service: service,
         }))
         navigation.navigate("משתמשים");
     };
 
-    const onExistingApptPresed = (index, uId) => {
-        setShowPopup(true);
-    }
+    const onCancleApptPress = () => {
+            Alert.alert('ביטול תור קיים', 'לבטל תור זה ?',
+                [{
+                    text: 'לא, התחרטתי'
+                },
+                {text: 'ביטול תור',
+                onPress: () => {
+                    cancelAppt();
+                    removeAppt();
+                }}])
+    };
+
+    const cancelAppt = async () => {
+        //make the appt available
+        const docRef = doc(db, 'Appointments', appointment.date);
+        const docSnap = await getDoc(docRef);
+        let events = []
+        events = docSnap.data().appointments;
+        events[appointment.index].available = true;
+        events[appointment.index].userId = '';
+        const del = await deleteDoc(doc(db, "Appointments", appointment.date));
+        del;
+        const update = await setDoc(doc(db, "Appointments", appointment.date), {
+            date: appointment.date,
+            appointments: events,
+        });
+        update;
+    };
+    
+    const removeAppt = async () => {
+        const userRef = doc(db, 'Users', appointment.userId);
+        const docSnap = await getDoc(userRef);
+        let events = docSnap.data().appointments;
+        let newArray = [];
+        for (let i = 0; i < events.length; i++) {
+            if(appointment.date !== events[i].date || appointment.index !== events[i].index)
+                newArray.push(events[i]);
+        }
+        await updateDoc(userRef, {
+            appointments: newArray,
+        });
+        setShowPopup(false);
+    };
 
     const renderItem = (item) => {
         return (
             <>
                 <Pressable style={styles.item} >
-                    <View style={{flexDirection: 'row'}}>
-                        {item.availiable === true ? 
-                        <Pressable onPress={() => onCreateApptPressed(item.startTime, item.endTime, item.availiable, item.index)}>
-                            <Icon name="calendar-plus-o" size={40} color='#E0AA3E' style={styles.icon}/>
-                        </Pressable> : 
-                        <Pressable onPress={() => onExistingApptPresed(item.startTime, item.endTime, item.availiable, item.index, item.userId)}>
-                            <Icon name="calendar-minus-o" size={40} color="red" style={styles.icon}/>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        {item.available === true ? 
+                        <>
+                        <Pressable onPress={() => onCreateApptPressed(item.startTime, item.endTime, item.available, item.index)}>
+                            <Icon name="md-add-sharp" size={30} style={{marginHorizontal: 10, color: '#000'}}/>
+                        </Pressable>
+                        <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
+                        </> :
+                        <Pressable onPress={() => onExistingApptPresed(item.startTime, item.endTime, item.available, item.index, item.userId)}
+                            style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <View style={{backgroundColor: "#E0AA3E", height:40, width:40, borderRadius: 30, margin: 10, justifyContent: 'center'}}>
+                                <Icon name="person-sharp" size={25} style={{color: '#fff', alignSelf: 'center'}}/>    
+                            </View>
+                        <View style={{alignItems: 'center'}}>
+                            <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
+                            <Text style={{marginTop: 7, fontSize: 14}}>{item.userId}</Text>
+                        </View>
                         </Pressable>}
-                    <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
-                    {item.availiable === true ? null : 
-                            <Text>{item.userId}</Text> }
                     </View>
                 </Pressable>
             </>
         );
     };
 
-    const onScheduleApptPressed = () => {
-        navigation.navigate('משתמשים');  
-    };
+    
 
     return (
         <SafeAreaView style={styles.container}>
             {loading ? <Loader /> : null}
             {showPopup? <AppointmentDetails
                             onClosePress={() => setShowPopup(false)}
+                            onCanclePress={onCancleApptPress}
                             /> 
             : null }
             <Agenda
@@ -93,12 +178,12 @@ export default function AdminScreen() {
                 refreshing={false}
                 renderItem={renderItem}
                 renderEmptyData={() => {
-                    return <View />;
+                    return <Text style={{alignSelf: 'center', marginTop: 100, color: 'silver'}}>אין תורים בתאריך זה</Text>;
                 }}
                 // renderDay={renderDay}
                 pastScrollRange={30}
                 futureScrollRange={30}
-                onDayPress={onDayPress}
+                onDayPress={(date) => setDate(date)}
                 theme={{
                     agendaDayTextColor: '#E0AA3E',
                     agendaDayNumColor: '#E0AA3E',
@@ -109,6 +194,9 @@ export default function AdminScreen() {
                     todayTextColor: '#E0AA3E',
                 }}
             />
+                {chooseService ? <Services 
+                    getService={(e)=> getService(e)}
+                    onXPressed={() =>setChooseService(false)}/> : null}
             <FooterMenu />
         </SafeAreaView>
     );
@@ -136,6 +224,7 @@ const styles = StyleSheet.create({
     },
     timeText: {
         fontSize: 16,
+        fontWeight: '500',
         color: '#000',
         alignSelf: 'center',
     },
