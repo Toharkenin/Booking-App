@@ -49,25 +49,34 @@ export const Navigation = () => {
             name='בית'
             component={Home}
             options={{
-                drawerIcon: () => <Icon name="home" size={22} style={styles.icons}/>
+                drawerIcon: () => <Icon name="home" size={22} style={styles.icons}/>,
+                drawerLabelStyle: {
+                    alignSelf: 'flex-start',
+                }
             }} />
-            <Drawer.Screen 
+            {/* <Drawer.Screen 
                 name='משתמש' 
                 component={UserInfo} 
                 options={{
                     drawerIcon: () => <Icon name="ios-person-outline" size={22} style={styles.icons}/>
-            }}/>
+            }}/> */}
             <Drawer.Screen 
                 name='קביעת תור חדש' 
                 component={Schedule} 
                 options={{
-                    drawerIcon: () => <Icon name="md-calendar-sharp" size={22} style={styles.icons}/>
+                    drawerIcon: () => <Icon name="md-calendar-sharp" size={22} style={styles.icons}/>,
+                    drawerLabelStyle: {
+                        alignSelf: 'flex-start',
+                    }
             }}/>
             <Drawer.Screen 
                 name='התורים שלי' 
                 component={Appointments}
                 options={{
-                    drawerIcon: () => <Icon name="ios-checkmark-done-sharp" size={22} style={styles.icons}/>
+                    drawerIcon: () => <Icon name="ios-checkmark-done-sharp" size={22} style={styles.icons}/>,
+                    drawerLabelStyle: {
+                        alignSelf: 'flex-start',
+                    }
             }}/>
             </Drawer.Navigator>
         </NavigationContainer>

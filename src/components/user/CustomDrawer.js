@@ -5,9 +5,20 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Divider } from 'react-native-elements';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from 'react';
 
 function CustomDrawr (props) {
-  const user = useSelector((state) => state.user.user);
+  // const user = useSelector((state) => state.user.user);
+  const [user, setUser] = useState('');
+
+  useEffect(() => {
+    const getUser = async () => {
+        const savedUser = await AsyncStorage.getItem("user");
+        const currentUser = JSON.parse(savedUser);
+        setUser(currentUser);
+    };
+    getUser();
+}, []);
 
   const onSignoutPress = async () => {
     try {

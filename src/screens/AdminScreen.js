@@ -8,7 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Services from '../components/user/Services';
 import Loader from '../components/user/Loader';
 import { db } from '../../Firebase';
-import { getDoc, doc, collection, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getDoc, doc, collection, onSnapshot, 
+    setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { set } from '../../redux/reducers/appointmentSlice';
 import AppointmentDetails from '../components/admin/AppointmentDetails';

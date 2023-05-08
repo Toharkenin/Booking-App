@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingVertical: 16,
     marginTop: 15,
+    height: 400,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
     shadowColor: "#000",
@@ -62,18 +63,26 @@ const styles = StyleSheet.create({
     shadowRadius: 16.00,
     elevation: 5, 
   },
+  icon: {
+    position:'absolute', 
+    zIndex: 999, 
+    alignSelf: 'flex-start', 
+    marginTop: 5,
+    marginLeft: 5,
+  }, 
   header: {
     fontSize: 18,
-    fontWeight: '800',
-    alignSelf: 'center',
-    // marginTop: 10,
-    color: '#000'
+        fontWeight: '800',
+        alignSelf: 'center',
+        marginTop: 10,
+        marginBottom: 16,
+        color: '#E0AA3E'
   },
   btn: {
     backgroundColor: '#fff',
     alignSelf: 'center',
     marginTop: 20,
-    width: 120,
+    width: 140,
     borderRadius: 10,
     paddingVertical: 10,
     shadowColor: "#000",
@@ -87,7 +96,8 @@ const styles = StyleSheet.create({
   },
   btnText: {
     fontSize: 16,
-    color: "#000",
-    alignSelf: 'center'
+    fontWeight: "bold",
+    color: '#E0AA3E',
+    alignSelf: 'center',
   },
 });

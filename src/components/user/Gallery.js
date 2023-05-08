@@ -6,7 +6,7 @@ import img2 from '../../assets/drawer-img.jpg';
 export default function Gallery (props) {
 
     return (
-        <View style={{marginTop: 60}}>
+        <View style={{marginTop: 50}}>
         <Text style={styles.header}>קולקציית התספורות</Text>
       <ScrollView showsHorizontalScrollIndicator={false} horizontal>
             <Image source={img} style={styles.img} resizeMode="contain"/>

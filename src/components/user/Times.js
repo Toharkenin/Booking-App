@@ -44,8 +44,13 @@ export default function Times({getTime, onXPressed}) {
               setDocExists(false);
           }
       }
-      fetchData()
+      fetchData();
       }, []);
+
+    //   useEffect(() => {
+    //     console.log('a', appointmentsList)
+    // }, []);
+
     
     return (  
         <View style={styles.container}>
@@ -62,7 +67,7 @@ export default function Times({getTime, onXPressed}) {
                               key={index} 
                               style={styles.btn}
                               onPress={() => onTimePressed(item.startTime, item.endTime, item.index)}>
-                              <Text style={styles.btnText}>{item.startTime}-{item.endTime}</Text>
+                              <Text style={styles.btnText}>{item.startTime} - {item.endTime}</Text>
                           </Pressable>
                       ))}
                   </ScrollView>
@@ -84,6 +89,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         padding: 16,
         height: 500,
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
       },
       icon: {
         position:'absolute', 
@@ -91,32 +98,34 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start', 
         marginTop: 5,
         marginLeft: 5,
-      },
+      }, 
       header: {
         fontSize: 18,
         fontWeight: '800',
         alignSelf: 'center',
         marginTop: 10,
         marginBottom: 16,
-        color: '#000'
+        color: '#E0AA3E'
       },
       btn: {
+        backgroundColor: '#fff',
         alignSelf: 'center',
-        backgroundColor: "white",
+        marginTop: 20,
+        borderRadius: 10,
+        paddingVertical: 10,
         shadowColor: "#000",
         shadowOffset: {
-          width: 10,
-          height: 10,
-        },
-        elevation: 10, 
-        marginTop: 30,
-        width: 200,
-        borderRadius: 10,
+        width: 0,
+        height: 1,
+        } ,
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
+        elevation: 3,
       },
       btnText: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#b89c47",
+        color: '#E0AA3E',
         paddingVertical: 10,
         paddingHorizontal: 20,
         alignSelf: 'center'

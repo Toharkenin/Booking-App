@@ -6,7 +6,7 @@ import CustomButton from '../components/user/CustomButton';
 import logo from '../assets/logo-dark.png';
 import Loader from '../components/user/Loader';
 import Popup from '../components/user/Popup';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { login } from '../../redux/reducers/userSlice';
 import { db, app } from '../../Firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -23,7 +23,7 @@ export default function Signin( {navigation} ) {
     const [loading, setLoading]= useState(false);
     const [welcomeMessage, setWelcomeMessage]= useState(false);
     const [userInfo, setUserInfo]= useState({});
-    const user = useSelector((state) => state.user.user);
+    // const user = useSelector((state) => state.user.user);
     
 
     const recaptchaVerifier = useRef(null);

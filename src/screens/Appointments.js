@@ -9,20 +9,33 @@ import { db } from '../../Firebase';
 import CustomButton from '../components/user/CustomButton';
 import { useNavigation } from '@react-navigation/native';
 import Communications from 'react-native-communications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Appointments () {
 
     const user = useSelector((state) => state.user.user);
+    // const [user, setUser] = useState('');
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [apptExists, setApptExists] = useState(false);
     const navigation = useNavigation();
+    let userRef
 
+    // useEffect(() => { 
+    //         const getUser = async () => {
+    //         const savedUser = await AsyncStorage.getItem("user");
+    //         const currentUser = JSON.parse(savedUser);
+    //         setUser(currentUser);
+    //     };
+    //     getUser();
+    // }, []);
+
+    console.log('app', user.phoneNumber);
+    userRef = doc(db, 'Users', user.phoneNumber);
     useEffect(() => { 
-        const docRef = doc(db, 'Users', user.phoneNumber);
         const getAppts = async () => {
         setLoading(true);
-        const unsub = onSnapshot(docRef, (docSnap) => {
+        const unsub = onSnapshot(userRef, (docSnap) => {
             if(docSnap.data().appointments.length > 0) {
                 setAppointments(docSnap.data().appointments);
                 console.log(appointments);
@@ -38,7 +51,7 @@ export default function Appointments () {
         }, []);
 
     const dateCompare = async (appt) => {
-        const userRef = doc(db, 'Users', user.phoneNumber);
+        // const userRef = doc(db, 'Users', user.phoneNumber);
         let newArray = [];
         for (let i = 0; i < appt.length; i++) {
             const dateString = `${appt[i].date} ${appt[i].startTime}:00`
@@ -83,7 +96,7 @@ export default function Appointments () {
     };
     
     const removeAppt = async (apptInfo) => {
-        const userRef = doc(db, 'Users', user.phoneNumber);
+        // const userRef = doc(db, 'Users', user.phoneNumber);
         const docSnap = await getDoc(userRef);
         let events = docSnap.data().appointments;
         let newArray = [];
