@@ -22,22 +22,23 @@ export default function AuthNavigator() {
 }, []);
 
     const addUser = () => {
+      user ? 
       dispatch(login({
             firstName: user.firstName,
             lastName: user.lastName,
             phoneNumber: user.phoneNumber,
-      }))
+      })) : null
     };
     addUser();
 
   return (
     <>
-      { user ? 
+      {/* { user ? 
       <Navigation /> :
       user.isAdmin ?
       <AdminNavigator />
-      : <SignedoutNavigator /> }
-      {/* <AdminNavigator /> */}
+      : <SignedoutNavigator /> } */}
+      <AdminNavigator />
     </>
   );
 }

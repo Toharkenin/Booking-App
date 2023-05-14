@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {View, Text, Image, StyleSheet, Pressable, SafeAreaView, ScrollView, Animated} from 'react-native';
+import {View, Text, Image, StyleSheet, Pressable, 
+    SafeAreaView, ScrollView, Animated,Linking} from 'react-native';
 import logo from '../assets/logo-dark.png';
 import CustomButton from '../components/user/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,6 +27,18 @@ export default function Home ( {navigation} ) {
 
     const onBtnPress = () => {
 
+    };
+
+    const openInstagram = () => {
+        Linking.openURL('https://instagram.com/danny_bokobza?igshid=NTc4MTIwNjQ2YQ==')
+    };
+
+    const openNavigationApps = () => {
+        
+    };
+
+    const openWhatsApp = () => {
+        Linking.openURL('whatsapp://send?text=&phone=+972548128044')
     };
 
     return (
@@ -56,7 +69,7 @@ export default function Home ( {navigation} ) {
                     </View>
                     <View style={styles.infoContainer}>
                         <Icon name='location' size={20}/>
-                        <Text style={styles.infoText}>כתובת: כפר עברי 12, ירושלים</Text>
+                        <Text style={styles.infoText}>כתובת: כפר עברי 14, ירושלים</Text>
                     </View>
                 </Animated.View> : null
                 }
@@ -67,9 +80,9 @@ export default function Home ( {navigation} ) {
                          style={{backgroundColor: '#fff'}} 
                          iconColor='#E0AA3E'
                          onPress={() => Communications.phonecall('0548128044', true)}/>
-                    <Btn name='instagram' iconColor='#fff' name2='אינסטגרם'/>
-                    <Btn name='direction' iconColor='#fff' name2='ניווט'/>
-                    <Btn name='message' iconColor='#fff' name2='ווצאפ'/>
+                    <Btn name='instagram' iconColor='#fff' name2='אינסטגרם' onPress={openInstagram}/>
+                    <Btn name='direction' iconColor='#fff' name2='ניווט' onPress={openNavigationApps}/>
+                    <Btn name='message' iconColor='#fff' name2='ווצאפ' onPress={openWhatsApp}/>
                 </View>
                 
                 <Text style={{alignSelf: 'center', marginTop: 10, fontWeight: '500'}}>אהבתם את האפליקציה? דרגו אותנו</Text>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, ScrollView, View, StyleSheet, TextInput, Alert, SafeAreaView} from 'react-native';
+import { Text, ScrollView, View, StyleSheet, TextInput, Alert, SafeAreaView, Platform} from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import CustomButton from '../user/CustomButton';
 import HeaderTabs from './HeaderTabs';
@@ -71,7 +71,6 @@ export default function ManageAppointments() {
 
    // Hendler for button press events and store the data firebase
    const confirmPressedHendler = () => {
-      docExistsValidation();
       const appointmentsDataByDate = {
          duration: parseInt(inputValues.duration),
          openingTime: parseInt(inputValues.openingTime),
@@ -113,24 +112,25 @@ export default function ManageAppointments() {
              text: 'סגירה'
          }])}
       else {    
-         // docExistsValidation();
+         docExistsValidation();
       }
    };
    
    const docExistsValidation = async () => {
       const docRef = doc(db, 'Appointments', date);
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-            Alert.alert('תאריך זה כבר מוגדר', 'האם אתה בטוח שתרצה לשנות?',
-            [{
-               text: 'סגירה'
+      console.log('9', docSnap.exists());
+      if (!docSnap.exists()) {
+         confirmPressedHendler();
+      } else {
+         Alert.alert('תאריך זה כבר מוגדר', 'האם אתה בטוח שתרצה לשנות?',
+         [{
+            text: 'סגירה'
          },
          {text: 'המשך בכל זאת',
-         onPress: () => {
-            confirmPressedHendler();
-         }}])}
-      else {
-         confirmPressedHendler();
+            onPress: () => {
+               confirmPressedHendler();
+            }}])
       }
    };
    
@@ -205,24 +205,23 @@ const DaysCheckBox = (props) => {
   const TimeInput = ( {getTime, placeholder, header}) => {
    const [open, setOpen] = useState(false);
    const [text, setText] = useState("");
-   const [time, setTime] = useState("");
+   const [time, setTime] = useState(new Date());
    // const [date, setDate] = useState(new Date());
 
    const onChange = (event, date) => {
-      setOpen(false);
+      setTime(date);
       let hours, minutes;
-      // if(date !== undefined) {
-      // }
-      //show the selected time in the input field
       date.getHours() < 10 ? hours = 
          '0' + JSON.stringify(date.getHours()) :   
           hours = JSON.stringify(date.getHours());
       date.getMinutes() < 10 ? minutes =
          '0' + JSON.stringify(date.getMinutes()) :   
          minutes = JSON.stringify(date.getMinutes());
-         setTime(date);
       setText(hours + ':' + minutes);
       getTime(hours + minutes);
+      if(Platform.OS === 'android') {
+         setOpen(false);
+      }
   };
 
   const onChangeText =(time) => {
@@ -240,7 +239,7 @@ const DaysCheckBox = (props) => {
             onChangeText={onChangeText}
          />
          { open ? <DateTimePicker 
-            value={new Date()}
+            value={time}
             mode="time"
             display={'default'}
             onChange={onChange}
@@ -314,6 +313,7 @@ const DaysCheckBox = (props) => {
          fontWeight: 'bold',
          marginVertical: 10,
          color: '#202020',
+         alignSelf: 'flex-start',
       },
       moreOptionsText: {
          fontSize: 15,

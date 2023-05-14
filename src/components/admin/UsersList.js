@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { login } from '../../../redux/reducers/userSlice';
 import EditUser from './EditUser';
 import moment from 'moment';
+import SearchUser from './SearchUser';
 
 function UsersList ({route}) {
     const [allUsers, setAllUsers] = useState([]);
@@ -21,6 +22,8 @@ function UsersList ({route}) {
     const [createUserModal, setCreateUserModal] = useState(false);
     const [editUser, setEditUser] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState('');
+    const [masterDataSource, setMasterDataSource] = useState([]);
     const dispatch = useDispatch();
 
     //navigation depending on route
@@ -31,7 +34,7 @@ function UsersList ({route}) {
     const usersCollectionRef = collection(db, 'Users');
     const appointment = useSelector((state) => state.appointmentDetails.appointment);
     let date;
-    !isUserEditing ? date = moment(appointment.date).format("DD.MM.YYYY") : null;
+    !isUserEditing ? date = moment(appointment.date).format("DD/MM/YYYY") : null;
     
     // get list of users from firebase firestore
     useEffect(() => { 
@@ -50,12 +53,29 @@ function UsersList ({route}) {
                     appointments: documentSnapshot.data().appointments,
                 });
                 setAllUsers(users);
+                setMasterDataSource(users);
             })
             setLoading(false);
         })};
         getUsers(); 
     }, []);
-    
+
+    const searchFilter = (text) => {
+        console.log(text)
+        if (text) {
+            const newData = allUsers.filter(user => {
+                const userFirstName = user.firstName;
+                const userLastName = user.lastName;
+                return userFirstName.indexOf(text) > -1 || userLastName.indexOf(text) > -1;
+            })
+            setAllUsers(newData);
+            setSearch(text);
+        } else {
+            setAllUsers(masterDataSource);
+            setSearch(text);
+        }
+        
+    };
 
     const onAddUserPressed = () => {
         setCreateUserModal(true);
@@ -136,19 +156,21 @@ function UsersList ({route}) {
             </Modal>
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 {<Text style={styles.header}>{isUserEditing ? 'משתמשים' : 'תור חדש'}</Text>}
-                <Text style={{padding: 5}}>{usersNum}</Text>
+                <Text>{usersNum}</Text>
                 <TouchableOpacity onPress={onAddUserPressed}>
                     <Icon2 name="md-add-sharp" size={30} style={{marginHorizontal: 20, color: '#000'}}/>
                 </TouchableOpacity>
             </View>
-            <Divider width={0.5} />
+            {/* <Divider width={0.5} /> */}
             {isUserEditing ? null : 
                 <>
                 <Text style={styles.dateAndTime}>{date}</Text>
                 <Text style={styles.dateAndTime}>{appointment.startTime} - {appointment.endTime}</Text>
                 </>
             }
-            <Divider width={0.5} />
+            {/* <Divider width={0.5} /> */}
+            <SearchUser value={search} onChangeText={text => searchFilter(text)}/>
+            <View style={styles.flatListContainer}>
             <FlatList
                 data={allUsers}
                 alwaysBounceHorizontal={false} 
@@ -187,9 +209,10 @@ function UsersList ({route}) {
                                 </View>
                             }
                         </View>
-                        <Divider width={0.8} />
+                        <Divider width={0.7} />
                     </>
             )} />
+            </View>
             {loading ? <Loader /> : null}
             {editUser ? <EditUser 
                 onClosePress={() => setEditUser(false)} /> : null}
@@ -235,7 +258,12 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginHorizontal: 10,
-    }
+    },
+    flatListContainer: {
+        backgroundColor: '#F5F5F5',
+        flex: 1,
+        marginTop: 10
+    },
 });
 
 export default UsersList;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Pressable, Alert} from 'react-native';
-import { Agenda } from 'react-native-calendars';
+import { StyleSheet, Text, View, Pressable, Alert, Linking} from 'react-native';
+import { Agenda, CalendarProvider  } from 'react-native-calendars';
 import FooterMenu from '../components/admin/FooterMenu';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -13,15 +13,15 @@ import { getDoc, doc, collection, onSnapshot,
 import { useDispatch, useSelector } from 'react-redux';
 import { set } from '../../redux/reducers/appointmentSlice';
 import AppointmentDetails from '../components/admin/AppointmentDetails';
+import moment from 'moment';
 
 export default function AdminScreen() {
     //hook for appointments in the calendar
     const [appointments, setAppointments] = useState({});
     const navigation = useNavigation();
-    const [date, setDate] = useState("");
+    const [date, setDate] = useState(new Date());
     const [loading, setLoading] = useState(false);
     const [service, setService] = useState('');
-    const [deleteButton, setDeleteButton] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [chooseService, setChooseService] = useState(false);
     const [apptDetails, setApptDetails] = useState({
@@ -33,6 +33,8 @@ export default function AdminScreen() {
 
     const dispatch = useDispatch();
     const appointment = useSelector((state) => state.appointmentDetails.appointment);
+    let dateFormated;
+    appointment ? dateFormated = moment(appointment.date).format("DD/MM/YY") : null;
 
     useEffect(() => {
         const getAppts = async () => {
@@ -58,10 +60,10 @@ export default function AdminScreen() {
         setApptDetails((prevState) => ({...prevState, ['index']:index}));
     };
 
+
     const onExistingApptPresed = async (start, end, available, index, userId) => {
         const docRef = doc(db, 'Users', userId);
         const docSnap = await getDoc(docRef);
-
         dispatch(set({
             startTime: start,
             endTime: end,
@@ -78,7 +80,6 @@ export default function AdminScreen() {
     const getService = (service) => {
         setService(service);
         setChooseService(false);
-        console.log('gtt', apptDetails.startTime, apptDetails.endTime, apptDetails.index)
         dispatch(set({
             startTime: apptDetails.startTime,
             endTime: apptDetails.endTime,
@@ -99,7 +100,15 @@ export default function AdminScreen() {
                 onPress: () => {
                     cancelAppt();
                     removeAppt();
-                }}])
+                }},
+                {
+                text: 'ביטול תור ושליחת הודעה',
+                onPress: () => {
+                    cancelAppt();
+                    removeAppt();
+                    Linking.openURL(`whatsapp://send?text=היי ${appointment.userFirstName} נמחק לך תור בתאריך ${dateFormated} &phone=+972${appointment.userId}`);
+                }
+                }])
     };
 
     const cancelAppt = async () => {
@@ -117,6 +126,7 @@ export default function AdminScreen() {
             appointments: events,
         });
         update;
+        setShowPopup(false);
     };
     
     const removeAppt = async () => {
@@ -146,7 +156,7 @@ export default function AdminScreen() {
                         </Pressable>
                         <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
                         </> :
-                        <Pressable onPress={() => onExistingApptPresed(item.startTime, item.endTime, item.available, item.index, item.userId)}
+                        <Pressable onPress={() => onExistingApptPresed(item.startTime, item.endTime, item.available, item.index, item.userId, item.date)}
                             style={{flexDirection: 'row', alignItems: 'center'}}>
                             <View style={{backgroundColor: "#E0AA3E", height:40, width:40, borderRadius: 30, margin: 10, justifyContent: 'center'}}>
                                 <Icon name="person-sharp" size={25} style={{color: '#fff', alignSelf: 'center'}}/>    
@@ -172,11 +182,13 @@ export default function AdminScreen() {
                             onCanclePress={onCancleApptPress}
                             /> 
             : null }
+            <CalendarProvider date="">
             <Agenda
                 items={appointments}
                 refreshControl={null}
                 showClosingKnob={true}
                 refreshing={false}
+                selected={new Date()}
                 renderItem={renderItem}
                 renderEmptyData={() => {
                     return <Text style={{alignSelf: 'center', marginTop: 100, color: 'silver'}}>אין תורים בתאריך זה</Text>;
@@ -184,6 +196,7 @@ export default function AdminScreen() {
                 // renderDay={renderDay}
                 pastScrollRange={30}
                 futureScrollRange={30}
+                scrollEnabled={true}
                 onDayPress={(date) => setDate(date)}
                 theme={{
                     agendaDayTextColor: '#E0AA3E',
@@ -195,6 +208,7 @@ export default function AdminScreen() {
                     todayTextColor: '#E0AA3E',
                 }}
             />
+            </CalendarProvider>
                 {chooseService ? <Services 
                     getService={(e)=> getService(e)}
                     onXPressed={() =>setChooseService(false)}/> : null}

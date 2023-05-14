@@ -114,7 +114,6 @@ export default function Signup({navigation}) {
     const onSignupPressed = () => {
 
             confirmationResult.confirm(code).then((result) => {
-                console.log('kk', result)
                 setWelcomeMessage(true);
                 const newUser = setDoc(doc(db, 'Users', inputs.phoneNumber),
                     {
@@ -138,7 +137,6 @@ export default function Signup({navigation}) {
                     text: 'סגירה'
                 }]
               )});
-               
     }
 
     return (

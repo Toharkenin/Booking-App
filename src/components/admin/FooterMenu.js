@@ -13,12 +13,18 @@ export default function FooterMenu() {
         });
     };
 
-    const SignOut = () => {};
-
+    const SignOut = async () => {
+    try {
+        await AsyncStorage.removeItem("user");
+      } catch (error) {
+        console.log(error);
+      }};
+      
     return (
         <View style={styles.container}>
                 <Icon name="calendar" text="ניהול תורים" onPress={() => navigation.navigate("Manage")}/>
                 <Icon name="users" text="משתמשים" onPress={usersListPressHendler}/>
+                <Icon name="comments-o" text="הודעה" onPress={() => navigation.navigate("Message")}/>
                 <Icon name="sign-out" text="יציאה" onPress={SignOut}/>
         </View>
     );

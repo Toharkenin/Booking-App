@@ -6,6 +6,7 @@ import { store } from './redux/store';
 import AdminScreen from './src/screens/AdminScreen';
 import UsersList from './src/components/admin/UsersList';
 import ManageAppointments from './src/components/admin/ManageAppointments';
+import Message from './src/components/admin/Message';
 // import NewAppointment from './src/components/admin/NewAppointment';
 
 const AdminNavigator = () => {
@@ -21,9 +22,9 @@ const AdminNavigator = () => {
                     <Stack.Screen name="Manage" component={ManageAppointments} options={{
                         presentation: 'modal', title: null, headerShown: null
                     }} /> 
-                    {/* <Stack.Screen name="תור חדש" component={NewAppointment} options={{
+                    <Stack.Screen name="Message" component={Message} options={{
                         presentation: 'modal', headerShown: null
-                    }}/> */}
+                    }}/>
                 </Stack.Navigator>
             </NavigationContainer>
         </Provider>
