@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Pressable, Alert, Linking} from 'react-native';
 import { Agenda, CalendarProvider  } from 'react-native-calendars';
 import FooterMenu from '../components/admin/FooterMenu';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Icon2 from 'react-native-vector-icons/Entypo';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Services from '../components/user/Services';
@@ -29,6 +30,7 @@ export default function AdminScreen() {
         endTime: '',
         available: '',
         index: '',
+        date: '',
     });
 
     const dispatch = useDispatch();
@@ -52,23 +54,24 @@ export default function AdminScreen() {
         getAppts();
     }, []);
 
-    const onCreateApptPressed = (start, end, available, index) => {
+    const onCreateApptPressed = (start, end, available, index, date) => {
         setChooseService(true);
         setApptDetails((prevState) => ({...prevState, ['startTime']:start}));
         setApptDetails((prevState) => ({...prevState, ['endTime']:end}));
         setApptDetails((prevState) => ({...prevState, ['available']:available}));
         setApptDetails((prevState) => ({...prevState, ['index']:index}));
+        setApptDetails((prevState) => ({...prevState, ['date']:date}));
     };
 
 
-    const onExistingApptPresed = async (start, end, available, index, userId) => {
+    const onExistingApptPresed = async (start, end, available, index, userId, date) => {
         const docRef = doc(db, 'Users', userId);
         const docSnap = await getDoc(docRef);
         dispatch(set({
             startTime: start,
             endTime: end,
             available: available,
-            date: date.dateString,
+            date: date,
             index: index,
             userId: docSnap.data().phoneNumber,
             userFirstName: docSnap.data().firstName,
@@ -84,7 +87,7 @@ export default function AdminScreen() {
             startTime: apptDetails.startTime,
             endTime: apptDetails.endTime,
             available: apptDetails.available,
-            date: date.dateString,
+            date: apptDetails.date,
             index: apptDetails.index,
             service: service,
         }))
@@ -151,11 +154,11 @@ export default function AdminScreen() {
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                         {item.available === true ? 
                         <>
-                        <Pressable onPress={() => onCreateApptPressed(item.startTime, item.endTime, item.available, item.index)}>
+                        <Pressable onPress={() => onCreateApptPressed(item.startTime, item.endTime, item.available, item.index, item.date)}>
                             <Icon name="md-add-sharp" size={30} style={{marginHorizontal: 10, color: '#000'}}/>
                         </Pressable>
                         <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
-                        </> :
+                        </> : !item.available && item.userId ?
                         <Pressable onPress={() => onExistingApptPresed(item.startTime, item.endTime, item.available, item.index, item.userId, item.date)}
                             style={{flexDirection: 'row', alignItems: 'center'}}>
                             <View style={{backgroundColor: "#E0AA3E", height:40, width:40, borderRadius: 30, margin: 10, justifyContent: 'center'}}>
@@ -165,7 +168,18 @@ export default function AdminScreen() {
                             <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
                             <Text style={{marginTop: 7, fontSize: 14}}>{item.userId}</Text>
                         </View>
-                        </Pressable>}
+                        </Pressable>
+                        : 
+                        <>
+                        <View style={{backgroundColor: "#E0AA3E", height:40, width:40, borderRadius: 30, margin: 10, justifyContent: 'center'}}>
+                            <Icon2 name="block" size={30} color="#000" style={{ alignSelf: 'center'}}/>    
+                        </View>
+                    <View style={{alignItems: 'center'}}>
+                        <Text style={styles.timeText}>{item.startTime} - {item.endTime}</Text>
+                        <Text style={{marginTop: 7, fontSize: 14}}>{item.userId}</Text>
+                    </View>
+                </>
+                        }
                     </View>
                 </Pressable>
             </>

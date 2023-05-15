@@ -5,14 +5,14 @@ export default function HeaderTabs(props) {
     return (
     <View style={{marginTop: 20}}>
         <View style={{flexDirection: "row", alignSelf: "center", paddingVertical: 15}}>
-            <HeaderButton 
-                text="הגדר ימים" 
-                activeBtn={props.activeBtn}
-                setActiveBtn={props.setActiveBtn} />
-            <HeaderButton 
+        <HeaderButton 
                 text="הגדר תאריך"
                 activeBtn={props.activeBtn}
                 setActiveBtn={props.setActiveBtn} /> 
+            <HeaderButton 
+                text="חסום תורים" 
+                activeBtn={props.activeBtn}
+                setActiveBtn={props.setActiveBtn} />
             </View>
     </View>
     );

@@ -1,65 +1,42 @@
 import React, { useState } from 'react';
-import { Text, ScrollView, View, StyleSheet, TextInput, Alert, SafeAreaView, Platform} from 'react-native';
-import { CheckBox } from 'react-native-elements';
+import { Text, ScrollView, View, StyleSheet, TextInput, Alert, SafeAreaView, 
+   Platform, FlatList} from 'react-native';
+import { Button } from 'react-native-elements';
 import CustomButton from '../user/CustomButton';
 import HeaderTabs from './HeaderTabs';
-import { SelectList } from 'react-native-dropdown-select-list'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import Popup from '../user/Popup';
 import { useNavigation } from '@react-navigation/native';
 import AdminCalendar from './AdminCalendar';
 import { createAppointmentsList } from '../../util/firebaseApptsSettings';
 import { db } from '../../../Firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import moment from 'moment';
+import Loader from '../user/Loader';
 
 export default function ManageAppointments() {
-   const [daysChecked, setDaysChecked] = useState([]);
-   const [checked, setChecked] = useState({
-      Sun: false,
-      Mon: false,
-      Tou: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-   });
-   const [counter, setCounter] = useState(0);
-   const [activeBtn, setActiveBtn] = useState("הגדר ימים");
+
+   const [activeBtn, setActiveBtn] = useState("הגדר תאריך");
    const [inputValues, setInputValues] = useState({
-      month: '',
       duration: '',
       openingTime: '',
       closingTime: '',
    });
+   const [loading, setLoading] = useState(false);
    const [date, setDate] = useState('');
    const [showPopup, setShowPopup] = useState(false);
    const navigation = useNavigation();
+   const [appointments, setAppointments] = useState([]);
    
-   //hendles checkbox pressed, adds checked day to an array of days
-   const onCheckBoxPressed = (checkBox, val, id) => {
-      val ?
-      (setChecked((prevState) => ({...prevState, [checkBox]:false})),  
-          setCounter(counter - 1), removeDayFromArray(id)) :
-      (setChecked((prevState)=> ({...prevState, [checkBox]:true})),
-          setCounter(counter + 1), addDayToArray(id));
-   };
-
-   //add a checked day to the array
-   const addDayToArray = (id) => {
-      setDaysChecked((prevDay) => [
-         ...prevDay, {
-             id,
-         },
-     ])};
    
-   //removes an unchecked day from the array
-   const removeDayFromArray = (id) => {
-      setDaysChecked((current) => 
-         current.filter(day => day.id !== id));
-   };
-
    const getDate = (date) => {
       setDate(date);
   };
+
+  const setActivateBtn = (e) => {
+   setActiveBtn(e);
+   setAppointments([]);
+};
 
    // Handler for changing the admin settings inputs
    const inputChangedHendler = (input, enteredValue) => {
@@ -76,19 +53,8 @@ export default function ManageAppointments() {
          openingTime: parseInt(inputValues.openingTime),
          closingTime: parseInt(inputValues.closingTime),
          date: date,
-         isDateExist: true,
+         isDateExist: true, 
       };
-      // const appointmentsDataByDays = {
-      //    month: inputValues.month,
-      //    duration: parseInt(inputValues.duration),
-      //    openingTime: parseInt(inputValues.openingTime),
-      //    closingTime: parseInt(inputValues.closingTime),
-      //    days: daysChecked,
-      //    isDateExist: false,
-      // };
-      
-      // activeBtn === 'הגדר ימים' ? (
-      // createAppointmentsList(appointmentsDataByDays)) :
       createAppointmentsList(appointmentsDataByDate)
       setShowPopup(true);
       setTimeout(() => {
@@ -119,7 +85,6 @@ export default function ManageAppointments() {
    const docExistsValidation = async () => {
       const docRef = doc(db, 'Appointments', date);
       const docSnap = await getDoc(docRef);
-      console.log('9', docSnap.exists());
       if (!docSnap.exists()) {
          confirmPressedHendler();
       } else {
@@ -133,28 +98,86 @@ export default function ManageAppointments() {
             }}])
       }
    };
-   
+
+   const getDate2 = async (date) => {
+      setDate(date);
+      const docRef = doc(db, 'Appointments', date);
+      const docSnap = await getDoc(docRef);
+      if(docSnap.exists()) {
+         let events = docSnap.data().appointments;
+         setAppointments(events);
+      } else {
+         setAppointments([]);
+      }
+   };
+
+   const blockEventsCheck = () => {
+      Alert.alert('', `לחסום את כל התורים לתאריך ${date}?`,
+                [{
+                    text: 'לא'
+                },
+                {text: 'לחסום',
+                onPress: () => {
+                  blockAppointments();
+                }}])
+   };
+
+   const blockAppointments = async () => {
+      setLoading(true);
+      const docRef = doc(db, 'Appointments', date);
+      const docSnap = await getDoc(docRef);
+      let events = docSnap.data().appointments;
+      let newArray = [];
+      for(let i = 0; i<events.length; i++) {
+         if(events[i].available){
+            events[i].available = false;   
+         }
+         newArray.push(events[i]);
+      }
+      await updateDoc(docRef, {
+            appointments: newArray,
+      }); 
+      setLoading(false); 
+      Alert.alert('', `התורים נחסמו בהצלחה`,
+      [{
+          text: 'סגירה'
+      }]);
+   };
+
+   const deleteEventsCheck = () => {
+      Alert.alert('', `למחוק את כל התורים לתאריך ${date}?`,
+                [{
+                    text: 'לא'
+                },
+                {text: 'למחוק',
+                onPress: () => {
+                  deleteAppointments();
+                }}])
+   };
+
+   const deleteAppointments = async () => {
+      setLoading(true);
+      await deleteDoc(doc(db, "Appointments", date));
+      setLoading(false);
+      Alert.alert('', `התורים נמחקו בהצלחה`,
+      [{
+          text: 'סגירה'
+      }]);
+   };
 
     return (
       <View style={styles.container}>
          {showPopup ? <Popup text1="השעות עודכנו בהצלחה!" /> : null}
-            <HeaderTabs activeBtn={activeBtn} setActiveBtn={setActiveBtn}/> 
-            <ScrollView >
-            { activeBtn === 'הגדר ימים' ?
-            <View style={styles.daysCheckBoxContainer}>
-               <DaysCheckBox text="א'" checked={checked.Sun} onPress={() => onCheckBoxPressed('Sun', checked.Sun, 0)}/>
-               <DaysCheckBox text="ב'" checked={checked.Mon} onPress={() => onCheckBoxPressed('Mon', checked.Mon, 1)}/>
-               <DaysCheckBox text="ג'" checked={checked.Tou} onPress={() => onCheckBoxPressed('Tou', checked.Tou, 2)}/>
-               <DaysCheckBox text="ד'" checked={checked.Wed} onPress={() => onCheckBoxPressed('Wed', checked.Wed, 3)}/>
-               <DaysCheckBox text="ה'" checked={checked.Thu} onPress={() => onCheckBoxPressed('Thu', checked.Thu, 4)}/>
-               <DaysCheckBox text="ו'" checked={checked.Fri} onPress={() => onCheckBoxPressed('Fri', checked.Fri, 5)}/>
-            </View>
-            : <AdminCalendar getDate={(e)=>getDate(e)}/> }
+            <HeaderTabs activeBtn={activeBtn} setActiveBtn={(e) =>setActivateBtn(e)}/> 
+            
+            { activeBtn === 'חסום תורים' ? 
+               <AdminCalendar getDate={e => getDate2(e)} /> :
+               <AdminCalendar getDate={e => getDate(e)}/>
+            }
             {
-            counter || activeBtn === 'הגדר תאריך' ?
-            <> 
+            activeBtn === 'הגדר תאריך' ?
+            <ScrollView >  
                <View style={styles.adminSettingsContainer}>
-                  {activeBtn === 'הגדר ימים' ? <SelectMonth onSelect={() =>inputValues.month} setSelected={(month) =>inputChangedHendler('month', month)}/> : null}
                   <DurationInput text='זמן לפגישה בדקות:' onChangeText={(duration) =>inputChangedHendler('duration', duration)}/>
                   <View style={{flexDirection: 'row'}}>
                      <TimeInput header='שעת פתיחה:' 
@@ -168,25 +191,44 @@ export default function ManageAppointments() {
                   </View>
                </View>
                <CustomButton text='אישור' onPress={validation} style={{marginTop: 100}}/>
-            </> : null
+            </ScrollView >  : 
+            appointments.length > 0 && activeBtn === 'חסום תורים' ?
+            <><FlatList 
+            data={appointments}
+            alwaysBounceHorizontal={false} 
+            showsScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({item}) => (
+               <>
+                <View style={{alignItems: 'center', marginVertical: 10}}>
+                  <View style={styles.apptsContainer}>
+                    <Text 
+                     style={[styles.apptsTimes, {color: item.available ? '#000' : !item.available && item.userId ? '#E0AA3E' : 'red'}]}>
+                        {item.startTime} - {item.endTime}</Text>
+                  </View>
+                </View>
+                </>
+        )}/>
+        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
+            <Button 
+               title='חסימת תורים' 
+               onPress={blockEventsCheck} 
+               style={styles.btn}
+               buttonStyle={{backgroundColor: '#E0AA3E', borderRadius: 10,}}/>
+            <Button 
+               title='מחיקת תורים' 
+               onPress={deleteEventsCheck} 
+               style={styles.btn}
+               buttonStyle={{backgroundColor: '#E0AA3E', borderRadius: 10,}}/>
+         </View>
+        </> : null
             }
-         </ScrollView>
+            {loading ? <Loader /> : null}
+         
       </View>
     );
   };
  
-const DaysCheckBox = (props) => {
-      return (
-         <View style={{alignItems: 'center'}}>
-            <Text style={styles.text}>{props.text}</Text>
-            <CheckBox 
-               {...props}
-               checkedColor='#E0AA3E'
-            />
-         </View>
-      )
-   };
-
   const DurationInput = (props) => {
       return (
          <View style={styles.inputContainer}>
@@ -248,39 +290,6 @@ const DaysCheckBox = (props) => {
    )
 };
 
-  const SelectMonth = (props) => {
-      const monthsList = [
-         {key: 0, value: 'ינואר'},
-         {key: 1, value: 'פברואר'},
-         {key: 2, value: 'מרץ'},
-         {key: 3, value: 'אפריל'},
-         {key: 4, value: 'מאי'},
-         {key: 5, value: 'יוני'},
-         {key: 6, value: 'יולי'},
-         {key: 7, value: 'אוגוסט'},
-         {key: 8, value: 'ספטמבר'},
-         {key: 9, value: 'אוקטובר'},
-         {key: 10, value: 'נובמבר'},
-         {key: 11, value: 'דצמבר'},
-     ];
-   
-      return (
-         <View style={{marginHorizontal: 10}}>
-            <Text style={styles.text}>לאיזה חודש</Text>
-            <SelectList 
-               setSelected={props.setSelected} 
-               onSelect={props.onSelect}
-               data={monthsList} 
-               save="key"
-               placeholder='בחר חודש'
-               searchPlaceholder='בחר חודש'
-               boxStyles={{backgroundColor: '#f5f5f5', borderWidth: 0}}
-               dropdownStyles={{ borderWidth: 0}}
-            />
-         </View>
-      )
-  };
-
   const styles = StyleSheet.create({
       container: {
          backgroundColor: '#fff',
@@ -321,4 +330,27 @@ const DaysCheckBox = (props) => {
          alignSelf: 'center',
          marginTop: 10,
       },
+      apptsContainer: {
+         backgroundColor: '#fff',
+         borderRadius: 10,
+         shadowColor: "#000",
+         shadowOffset: {
+         width: 0,
+         height: 1,
+         } ,
+         shadowOpacity: 0.22,
+         shadowRadius: 2.22,
+         elevation: 3,
+      },
+      apptsTimes: {
+         fontSize: 16,
+         fontWeight: "bold",
+         paddingVertical: 10,
+         paddingHorizontal: 10,
+         alignSelf: 'center'
+       },
+       btn: {
+         width: 170,
+         marginBottom: 20,
+       },
   });

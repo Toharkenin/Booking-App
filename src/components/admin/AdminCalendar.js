@@ -18,7 +18,8 @@ export default function AdminCalendar({ getDate }) {
   };
     return (
         <View style={styles.container}>
-            <Calendar minDate={Date()}
+            <Calendar
+                minDate={'2023-01-01'}
               maxDate={"2030-05-30"}
               onDayPress={day => {
                   onDayPress(day.dateString);

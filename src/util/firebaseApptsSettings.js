@@ -25,6 +25,7 @@ export function createAppointmentsList(appt) {
             available: true,
             userId: "",
             index: index,
+            date: appt.date,
         });
         startTime = endTime;
         index++;
